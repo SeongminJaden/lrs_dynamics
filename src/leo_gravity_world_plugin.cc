@@ -4,8 +4,11 @@
 #include <ignition/math/Vector3.hh>
 
 #include "gazebo_leo_gravity/ggm_model.hpp"
+#include "gazebo_leo_gravity/legendre.hpp"
 
 #include <string>
+#include <vector>
+#include <memory>
 
 namespace gazebo_leo_gravity
 {
@@ -13,51 +16,55 @@ namespace gazebo_leo_gravity
 class LeoGravityWorldPlugin : public gazebo::WorldPlugin
 {
 public:
-    LeoGravityWorldPlugin() {}
+    LeoGravityWorldPlugin() : update_counter_(0) {}
     virtual ~LeoGravityWorldPlugin() {}
 
-    // Called when the plugin is loaded
-    void Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf) override
+void Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf) override
+{
+    world_ = _world;
+
+    world_->SetGravity(ignition::math::Vector3d(0,0,0));
+
+    int nmax = 20;
+    if (_sdf->HasElement("nmax"))
+        nmax = _sdf->Get<int>("nmax");
+
+    std::string ggm_file = "/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc";
+    if (_sdf->HasElement("ggm_file"))
+        ggm_file = _sdf->Get<std::string>("ggm_file");
+
+    if (!ggm_model_.load(ggm_file, nmax))
     {
-        world_ = _world;
-
-        // Get GGM05C file path from SDF parameter
-        std::string ggm_file = "data/GGM05C.gfc";
-        if (_sdf->HasElement("ggm_file"))
-            ggm_file = _sdf->Get<std::string>("ggm_file");
-
-        // Load GGM05C model (nmax = 50 for speed)
-        if (!ggm_model_.load(ggm_file, 50))
-        {
-            gzerr << "[LeoGravityWorldPlugin] Failed to load GGM05C file.\n";
-            return;
-        }
-
-        // Connect update event
-        update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-            std::bind(&LeoGravityWorldPlugin::OnUpdate, this));
+        gzerr << "[LeoGravityWorldPlugin] Failed to load GGM05C file.\n";
+        return;
     }
 
-    // Called every simulation iteration
+    for (auto model : world_->Models())
+    {
+        if (!model->IsStatic())
+            dynamic_models_.push_back(model);
+    }
+
+    update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+        std::bind(&LeoGravityWorldPlugin::OnUpdate, this));
+}
+
     void OnUpdate()
     {
-        // Iterate over all models in the world
-        for (auto model : world_->Models())
+
+        update_counter_++;
+        if (update_counter_ % 10 != 0) return;
+
+        for (auto model : dynamic_models_)
         {
-            // Skip static models
-            if (model->IsStatic()) continue;
+            if (!model || !model->GetLink()) continue;
 
-            // Get model position
             ignition::math::Vector3d pos = model->WorldPose().Pos();
-
-            // Compute gravity acceleration using GGM05C
             ignition::math::Vector3d grav_acc = ggm_model_.acceleration(pos);
 
-            // Apply Force: F = m * g
             double mass = model->GetLink()->GetInertial()->Mass();
             ignition::math::Vector3d force = grav_acc * mass;
 
-            // Apply force to the first link
             model->GetLink()->AddForce(force);
         }
     }
@@ -66,9 +73,11 @@ private:
     gazebo::physics::WorldPtr world_;
     gazebo::event::ConnectionPtr update_connection_;
     GGMModel ggm_model_;
+    std::vector<gazebo::physics::ModelPtr> dynamic_models_;
+    int update_counter_;
 };
 
-// Register plugin
 GZ_REGISTER_WORLD_PLUGIN(LeoGravityWorldPlugin)
 
 } // namespace gazebo_leo_gravity
+

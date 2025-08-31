@@ -22,19 +22,19 @@ include_directories(
 set(SOURCES
   src/ggm_model.cpp
   src/legendre.cpp
-  src/leo_gravity_plugin.cpp
+  src/leo_gravity_world_plugin.cc
 )
 
 # Compile shared library for Gazebo plugin
-add_library(libleo_gravity_plugin SHARED ${SOURCES})
-target_link_libraries(libleo_gravity_plugin ${GAZEBO_LIBRARIES})
-ament_target_dependencies(libleo_gravity_plugin
+add_library(leo_gravity_world_plugin SHARED ${SOURCES})
+target_link_libraries(leo_gravity_world_plugin ${GAZEBO_LIBRARIES})
+ament_target_dependencies(leo_gravity_world_plugin
   rclcpp
   ignition-math6
 )
 
 # Install plugin library
-install(TARGETS libleo_gravity_plugin
+install(TARGETS leo_gravity_world_plugin
   DESTINATION lib
 )
 
@@ -48,4 +48,11 @@ install(DIRECTORY data/
   DESTINATION share/${PROJECT_NAME}/data
 )
 
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+install(DIRECTORY worlds/
+  DESTINATION share/${PROJECT_NAME}/worlds
+)
 ament_package()

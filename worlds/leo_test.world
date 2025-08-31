@@ -1,0 +1,19 @@
+<sdf version="1.6">
+  <world name="leo_world">
+    <physics type="ode">
+      <gravity>0 0 0</gravity> <!-- Disable default Earth gravity -->
+      <ode>
+        <solver>
+          <type>quick</type>
+        </solver>
+      </ode>
+    </physics>
+
+
+    <!-- World plugin for LEO gravity -->
+<plugin name="leo_gravity" filename="libleo_gravity_world_plugin.so">
+    <ggm_file>/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc</ggm_file>
+    <nmax>20</nmax>
+</plugin>
+  </world>
+</sdf>
