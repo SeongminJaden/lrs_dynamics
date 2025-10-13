@@ -212,9 +212,11 @@ $$
 
 
 **Gazebo 힘 적용:**
-[
+
+$$
 \mathbf{F} = m \mathbf{a}
-]
+$$
+
 
 **팔-위성 결합 동역학:** 팔 운동 → 위성 토크 반작용. HPOP: CoM, Gazebo: 자세+팔, Plugin: 반작용 계산.
 
