@@ -182,26 +182,34 @@ ros2 launch satellite_sim satellite_sim.launch.py
 ### 7. 물리 모델링
 
 **지구 중력 퍼텐셜 (GGM05C):**
-[
+
+$$
 V(r, \phi, \lambda) = \frac{GM}{r} [1 + \sum_{n=2}^{n_{max}} (\frac{a}{r})^n \sum_{m=0}^{n} \bar{P}*{n,m}(\sin \phi)(\bar{C}*{n,m}\cos(m\lambda) + \bar{S}_{n,m}\sin(m\lambda))]
-]
+$$
+
 
 **완전정규화 레젠드르 함수:**
-[
+
+$$
 \bar{P}*{n,m}(x) = N*{n,m} P_{n,m}(x),\quad N_{n,m} = \sqrt{(2-\delta_{m0})(2n+1)\frac{(n-m)!}{(n+m)!}}
-]
+$$
+
 
 **중력 가속도:**
-[
+
+$$
 \mathbf{a} = -\nabla V,\quad a_r = -\frac{\partial V}{\partial r}, a_\phi = -\frac{1}{r}\frac{\partial V}{\partial \phi}, a_\lambda = -\frac{1}{r\cos\phi}\frac{\partial V}{\partial \lambda}
-]
+$$
+
 
 **구면 → Cartesian 변환:**
-[
+
+$$
 \begin{aligned} a_x &= a_r \cos\phi \cos\lambda - a_\phi \sin\phi \cos\lambda - a_\lambda \sin\lambda \
 a_y &= a_r \cos\phi \sin\lambda - a_\phi \sin\phi \sin\lambda + a_\lambda \cos\lambda \
 a_z &= a_r \sin\phi + a_\phi \cos\phi \end{aligned}
-]
+$$
+
 
 **Gazebo 힘 적용:**
 [
