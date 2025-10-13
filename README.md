@@ -56,37 +56,37 @@ Initial state → HPOP → (r,v) → ECI→Gazebo → Plugin → Satellite Pose 
 ### 7. Physics & Gravity Modeling
 
 **Earth Gravity Potential (GGM05C):**
-[
+$$[
 V(r, \phi, \lambda) = \frac{GM}{r} \left[1 + \sum_{n=2}^{n_{max}} \left(\frac{a}{r}\right)^n \sum_{m=0}^{n} \bar{P}*{n,m}(\sin \phi)(\bar{C}*{n,m}\cos(m\lambda) + \bar{S}_{n,m}\sin(m\lambda))\right]
-]
+]$$
 
 **Fully-Normalized Associated Legendre Functions:**
-[
+$$[
 \bar{P}*{n,m}(x) = N*{n,m} P_{n,m}(x),\quad N_{n,m} = \sqrt{(2-\delta_{m0})(2n+1)\frac{(n-m)!}{(n+m)!}}
-]
+]$$
 
 **Gravitational Acceleration:**
-[
+$$[
 \mathbf{a} = -\nabla V
-]
+]$$
 Components:
-[
+$$[
 a_r = -\frac{\partial V}{\partial r},\quad a_\phi = -\frac{1}{r} \frac{\partial V}{\partial \phi},\quad a_\lambda = -\frac{1}{r\cos\phi} \frac{\partial V}{\partial \lambda}
-]
+]$$
 
 **Spherical → Cartesian:**
-[
+$$[
 \begin{aligned}
 a_x &= a_r \cos\phi \cos\lambda - a_\phi \sin\phi \cos\lambda - a_\lambda \sin\lambda \
 a_y &= a_r \cos\phi \sin\lambda - a_\phi \sin\phi \sin\lambda + a_\lambda \cos\lambda \
 a_z &= a_r \sin\phi + a_\phi \cos\phi
 \end{aligned}
-]
+]$$
 
 **Force in Gazebo:**
-[
+$$[
 \mathbf{F} = m \mathbf{a}
-]
+]$$
 
 **Coupled Satellite-Arm Dynamics:** Arm motion induces torque on satellite. Use HPOP for CoM orbit, Gazebo for attitude + arm, ModelPlugin for reaction.
 
