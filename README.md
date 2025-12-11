@@ -1,4 +1,4 @@
-# ROS2 기반 LEO 위성 및 로봇팔 통합 시뮬레이션
+<img width="56" height="74" alt="image" src="https://github.com/user-attachments/assets/e0c808a5-38fe-4725-94ce-5c71fc2ec650" /># ROS2 기반 LEO 위성 및 로봇팔 통합 시뮬레이션
 ## 초록 (Abstract)
 
 기존 Gazebo 및 ROS 기반 시뮬레이션 환경은 지상 로봇 중심으로 설계되어, 정밀한 저궤도(LEO) 중력장, 궤도 섭동, 위성-로봇 결합 동역학 등의 복잡한 우주 환경을 충분히 재현하기 어렵다.
@@ -98,7 +98,7 @@ Initial state → HPOP → (r,v) → ECI→Gazebo → Plugin → Satellite Pose 
 
 ### 7. Physics & Gravity Modeling
 
-**Earth Gravity Potential (GGM05C):**
+**Earth Gravity Potential (GOCO2025s):**
 
 $$
 V(r, \phi, \lambda) = \frac{GM}{r} \left[1 + \sum_{n=2}^{n_{max}} \left(\frac{a}{r}\right)^n \sum_{m=0}^{n} \bar{P}*{n,m}(\sin \phi)(\bar{C}*{n,m}\cos(m\lambda) + \bar{S}_{n,m}\sin(m\lambda))\right]
