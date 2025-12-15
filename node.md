@@ -18,3 +18,34 @@ flowchart TD
     J --> K[TF Broadcaster]
     J --> L[Gazebo Model Update]
     J --> M[RViz / Logging]
+
+
+
+graph LR
+    GZ[Gazebo<br/>GGM05C Plugin]
+    OP[Orbit Propagator<br/>6-DoF HPOP]
+    DRAG[Drag Node]
+    SRP[SRP Node]
+    TB[3rd Body Node]
+    PA[Perturbation Aggregator]
+    DV[ΔV / Thrust Manager]
+    ATT[Attitude / Arm Dynamics]
+    TF[TF Broadcaster]
+    RV[RViz / Logger]
+
+    GZ -->|a_gravity| OP
+
+    OP -->|PV| DRAG
+    OP -->|PV| SRP
+    OP -->|PV| TB
+
+    DRAG --> PA
+    SRP --> PA
+    TB --> PA
+
+    PA -->|a_pert| OP
+    DV -->|ΔV Event| OP
+    ATT -->|I(t), r_cm, τ| OP
+
+    OP --> TF
+    OP --> RV
