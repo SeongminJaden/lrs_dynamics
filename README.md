@@ -20,12 +20,16 @@ This project builds a high-fidelity simulation platform integrating ROS2 and Gaz
 
 ### 4. Scope & Assumptions
 
-* ROS2 Humble/Iron
-* Gazebo Fortress/Garden
-* HPOP numerical integration with dt-based publishing
-* Optional SGP4 for rapid prototyping
-* Development PC: quad-core+, 16GB RAM
-* dt: 0.1–1.0 s recommended
+Synchronization
+* HPOP publish: 10 Hz (dt=0.1s)
+* Gazebo update: faster than HPOP
+* Frames: ECI → Gazebo world (or ENU)
+Development Environment
+* Ubuntu 22.04
+* ROS2 Humble
+* Gazebo
+* MoveIt2
+* C++ (plugins), Python (nodes)
 
 ### 5. System Architecture
 #### 5.1 End-to-End Flow
