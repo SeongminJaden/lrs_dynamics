@@ -111,7 +111,7 @@ sequenceDiagram
 
 **Components:**
 
-1. Orbit Propagator Node (HPOP) → publishes `/satellite/orbit_state`
+1. Orbit Propagator Node (HPOP)
 2. Orbit-to-Gazebo Bridge → ECI → Gazebo conversion
 3. Gazebo World & Plugins → ModelPlugin, WorldPlugin
 4. Satellite & Manipulator → URDF/SDF with 6-DoF arm
