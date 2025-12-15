@@ -1,5 +1,5 @@
 # End-to-End Flow
-
+```mermaid
 flowchart TD
     A[Simulation Start] --> B[Initial State PV and Attitude]
     B --> C[Orbit Propagator 6DoF]
@@ -20,10 +20,10 @@ flowchart TD
     J --> K[TF Broadcaster]
     J --> L[Gazebo Model Update]
     J --> M[RViz Logging]
-
+```
 
 # ROS Node Graph
-
+```mermaid
 graph LR
     GZ[Gazebo GGM05C Plugin]
     OP[Orbit Propagator 6DoF HPOP]
@@ -52,11 +52,11 @@ graph LR
 
     OP --> TF
     OP --> RV
-
+```
 
 
 # Integration sequenceDiagram
-
+```mermaid
 sequenceDiagram
     participant ROS
     participant OP as Orbit Propagator
@@ -76,4 +76,4 @@ sequenceDiagram
     OP->>OP: Apply ΔV (if t_k)
     OP->>OP: Integrate Δt
     OP->>ROS: Publish State + TF
-
+```
