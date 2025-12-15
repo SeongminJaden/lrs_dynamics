@@ -126,10 +126,210 @@ Initial state → HPOP → (r,v) → ECI→Gazebo → Plugin → Satellite Pose 
 
 ### 6. Messages & Interfaces
 
-* `/satellite/orbit_state` : `nav_msgs/Odometry`
-* `/satellite/eci_state` : custom `{ header, r[3], v[3], epoch }`
-* `/gazebo/set_model_state` : `gazebo_msgs/ModelState`
-* Services: `/orbit/reset`, `/orbit/set_parameters`
+#### 6.1 Orbit Propagator (Core Node)
+
+##### Package
+`orbit_propagator_hpop`
+
+##### Node
+`orbit_propagator_node`
+
+The orbit propagator is the **single source of truth** for translational and rotational state.  
+All forces, perturbations, and maneuvers are applied **only at numerical integration boundaries**.
+
+---
+
+##### Subscribed Topics
+
+| Topic | Type | Publisher (Node / Package) | Description |
+|---|---|---|---|
+| `/gravity_accel` | `geometry_msgs/Vector3` | `ggm05c_plugin / gazebo_gravity_ggm05c` | Earth gravity acceleration from Gazebo |
+| `/perturbation_accel` | `geometry_msgs/Vector3` | `perturbation_aggregator / perturbation_nodes` | Aggregated non-gravitational perturbations |
+| `/delta_v_event` | `orbit_msgs/DeltaVEvent` | `maneuver_manager_node` | Impulsive maneuver event |
+| `/thrust_cmd` | `orbit_msgs/ThrustCmd` | `maneuver_manager_node` | Finite thrust command |
+| `/attitude_state` | `geometry_msgs/Pose` | `attitude_dynamics_node` | Current satellite attitude |
+| `/inertia_update` | `orbit_msgs/Inertia` | `attitude_dynamics_node` | Updated inertia due to arm motion |
+| `/external_pv_update` | `nav_msgs/Odometry` | (Optional) OD / EKF | External state correction |
+
+---
+
+##### Published Topics
+
+| Topic | Type | Subscribers |
+|---|---|---|
+| `/orbit/pv_state` | `nav_msgs/Odometry` | Perturbation nodes |
+| `/orbit/propagated_state` | `nav_msgs/Odometry` | TF, RViz, logging |
+| `/orbit/accel_total` | `geometry_msgs/Vector3` | Debug / analysis |
+| `/orbit/integration_status` | `std_msgs/String` | Logging |
+
+---
+
+#### 6.2 Gazebo Gravity Plugin (GGM05C)
+
+##### Package
+`gazebo_gravity_ggm05c`
+
+### Plugin
+`GGM05CGravityPlugin`
+
+---
+
+##### Published Topics
+
+| Topic | Type | Description |
+|---|---|---|
+| `/gravity_accel` | `geometry_msgs/Vector3` | Earth gravity acceleration computed using GGM05C |
+
+**Note**  
+The Gazebo plugin never modifies the state directly.  
+It only provides sampled force information.
+
+---
+
+#### 6.3 Perturbation Modeling
+
+##### Package
+`perturbation_nodes`
+
+---
+
+##### Subscribed Topics (All Perturbation Nodes)
+
+| Topic | Type |
+|---|---|
+| `/orbit/pv_state` | `nav_msgs/Odometry` |
+
+---
+
+##### Published Topics (Individual Nodes)
+
+| Node | Topic | Type |
+|---|---|---|
+| `drag_node` | `/drag_accel` | `geometry_msgs/Vector3` |
+| `srp_node` | `/srp_accel` | `geometry_msgs/Vector3` |
+| `third_body_node` | `/third_body_accel` | `geometry_msgs/Vector3` |
+
+---
+
+##### Perturbation Aggregator
+
+###### Node
+`perturbation_aggregator`
+
+| Direction | Topic |
+|---|---|
+| Subscribe | `/drag_accel` |
+| Subscribe | `/srp_accel` |
+| Subscribe | `/third_body_accel` |
+| Publish | `/perturbation_accel` |
+
+---
+
+#### 6.4 Maneuver and Delta-V Management
+
+##### Package
+`maneuver_manager`
+
+##### Node
+`maneuver_manager_node`
+
+---
+
+##### Published Topics
+
+| Topic | Type | Description |
+|---|---|---|
+| `/delta_v_event` | `orbit_msgs/DeltaVEvent` | Time-tagged impulsive maneuver |
+| `/thrust_cmd` | `orbit_msgs/ThrustCmd` | Finite-duration thrust |
+
+Maneuver events are buffered and applied **only at integration boundaries**  
+to preserve numerical stability.
+
+---
+
+#### 6.5 Attitude and Robotic Arm Dynamics
+
+##### Package
+`attitude_dynamics`
+
+##### Node
+`attitude_dynamics_node`
+
+---
+
+##### Subscribed Topics
+
+| Topic | Publisher |
+|---|---|
+| `/joint_states` | MoveIt2 |
+| `/move_group/status` | MoveIt2 |
+
+---
+
+##### Published Topics
+
+| Topic | Type | Description |
+|---|---|---|
+| `/attitude_state` | `geometry_msgs/Pose` | Satellite attitude |
+| `/inertia_update` | `orbit_msgs/Inertia` | Updated inertia tensor |
+| `/torque_effect` | `geometry_msgs/Vector3` | Torque induced by arm motion |
+
+---
+
+#### 6.6 MoveIt2 Robotic Arm
+
+##### Package
+`moveit_sat_arm`
+
+##### Nodes
+- `move_group`
+- `robot_state_publisher`
+
+---
+
+##### Published Topics
+
+| Topic | Type |
+|---|---|
+| `/joint_states` | `sensor_msgs/JointState` |
+| `/tf` | TF |
+| `/tf_static` | TF |
+
+---
+
+##### Subscribed Topics (Optional)
+
+| Topic | Purpose |
+|---|---|
+| `/orbit/propagated_state` | Frame synchronization |
+
+---
+
+#### 6.7 TF Management
+
+##### Package
+`tf_manager`
+
+##### Node
+`orbit_tf_broadcaster`
+
+---
+
+##### Subscribed Topics
+
+| Topic | Source |
+|---|---|
+| `/orbit/propagated_state` | Orbit Propagator |
+| `/attitude_state` | Attitude Dynamics |
+
+---
+
+##### Published Topics
+
+| Topic | Type |
+|---|---|
+| `/tf` | TF |
+| `/tf_static` | TF |
 
 ### 7. Physics & Gravity Modeling
 
