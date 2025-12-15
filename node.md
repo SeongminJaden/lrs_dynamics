@@ -1,39 +1,42 @@
-flowchart TD
-    A[Simulation Start] --> B[Initial State PV, Attitude]
-    B --> C[Orbit Propagator 6-DoF Loop]
+# End-to-End Flow
 
-    C -->|Request r(t)| D[Gazebo Gravity Plugin<br/>(GGM05C)]
-    D -->|a_gravity| C
+flowchart TD
+    A[Simulation Start] --> B[Initial State PV and Attitude]
+    B --> C[Orbit Propagator 6DoF]
+
+    C -->|Request position| D[Gazebo Gravity Plugin GGM05C]
+    D -->|Gravity acceleration| C
 
     C -->|Publish PV| E[Perturbation Nodes]
-    E -->|a_drag / a_srp / a_3body| F[Perturbation Aggregator]
-    F -->|a_pert| C
+    E -->|Drag SRP ThirdBody| F[Perturbation Aggregator]
+    F -->|Total perturbation| C
 
-    G[ΔV / Thrust Manager] -->|ΔV Event| C
-    H[Attitude & Arm Dynamics] -->|I(t), r_cm(t), τ| C
+    G[DeltaV Thrust Manager] -->|DeltaV Event| C
+    H[Attitude Arm Dynamics] -->|Inertia COM Torque| C
 
-    C --> I[Numerical Integration Δt]
-    I --> J[Updated PV + Attitude]
+    C --> I[Numerical Integration Dt]
+    I --> J[Updated PV and Attitude]
 
     J --> K[TF Broadcaster]
     J --> L[Gazebo Model Update]
-    J --> M[RViz / Logging]
+    J --> M[RViz Logging]
 
 
+# ROS Node Graph
 
 graph LR
-    GZ[Gazebo<br/>GGM05C Plugin]
-    OP[Orbit Propagator<br/>6-DoF HPOP]
+    GZ[Gazebo GGM05C Plugin]
+    OP[Orbit Propagator 6DoF HPOP]
     DRAG[Drag Node]
     SRP[SRP Node]
-    TB[3rd Body Node]
+    TB[Third Body Node]
     PA[Perturbation Aggregator]
-    DV[ΔV / Thrust Manager]
-    ATT[Attitude / Arm Dynamics]
+    DV[DeltaV Thrust Manager]
+    ATT[Attitude Arm Dynamics]
     TF[TF Broadcaster]
-    RV[RViz / Logger]
+    RV[RViz Logger]
 
-    GZ -->|a_gravity| OP
+    GZ -->|GravityAccel| OP
 
     OP -->|PV| DRAG
     OP -->|PV| SRP
@@ -43,9 +46,34 @@ graph LR
     SRP --> PA
     TB --> PA
 
-    PA -->|a_pert| OP
-    DV -->|ΔV Event| OP
-    ATT -->|I(t), r_cm, τ| OP
+    PA -->|TotalPerturb| OP
+    DV -->|DeltaVEvent| OP
+    ATT -->|InertiaAndTorque| OP
 
     OP --> TF
     OP --> RV
+
+
+
+# Integration sequenceDiagram
+
+sequenceDiagram
+    participant ROS
+    participant OP as Orbit Propagator
+    participant GZ as Gravity Plugin
+    participant PA as Perturbation Agg.
+    participant DV as ΔV Manager
+
+    ROS->>OP: PV Update (buffered)
+    DV->>OP: ΔV Event (queued)
+
+    OP->>GZ: r(t)
+    GZ-->>OP: a_gravity
+
+    OP->>PA: r(t), v(t)
+    PA-->>OP: a_pert
+
+    OP->>OP: Apply ΔV (if t_k)
+    OP->>OP: Integrate Δt
+    OP->>ROS: Publish State + TF
+
