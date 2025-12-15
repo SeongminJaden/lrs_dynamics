@@ -384,22 +384,8 @@ $$
 
 **Coupled Satellite-Arm Dynamics:** Arm motion induces torque on satellite. Use HPOP for CoM orbit, Gazebo for attitude + arm, ModelPlugin for reaction.
 
-### 8. Synchronization
 
-* HPOP publish: 10 Hz (dt=0.1s)
-* Gazebo update: faster than HPOP
-* Frames: ECI → Gazebo world (or ENU)
-
-
-### 9. Development Environment
-
-* Ubuntu 22.04
-* ROS2 Humble/Iron
-* Gazebo Fortress/Garden
-* MoveIt2
-* C++ (plugins), Python (nodes)
-
-### 10. Build & Run
+### 8. Build & Run
 
 ```bash
 colcon build --packages-select satellite_description satellite_plugins satellite_control satellite_moveit satellite_utils gazebo_leo_gravity
