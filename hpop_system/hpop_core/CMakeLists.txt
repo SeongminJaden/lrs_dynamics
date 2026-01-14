@@ -32,10 +32,17 @@ target_include_directories(${PROJECT_NAME} INTERFACE
   $<INSTALL_INTERFACE:include>
 )
 
-# Test executable
+# Test executable - basic propagator test
 add_executable(test_propagator test/test_propagator.cpp)
 target_include_directories(test_propagator PRIVATE include)
 target_link_libraries(test_propagator)
+
+# Test executable - full propagation with all perturbations
+add_executable(test_full_propagation test/test_full_propagation.cpp)
+target_include_directories(test_full_propagation PRIVATE
+  include
+  ${CMAKE_CURRENT_SOURCE_DIR}/../hpop_perturbations/include
+)
 
 # ROS2 Node: Orbit Propagator
 add_executable(orbit_propagator_node src/nodes/orbit_propagator_node.cpp)
@@ -64,7 +71,7 @@ install(TARGETS ${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
 
-install(TARGETS test_propagator orbit_propagator_node
+install(TARGETS test_propagator test_full_propagation orbit_propagator_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

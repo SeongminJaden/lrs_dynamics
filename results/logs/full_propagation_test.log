@@ -1,0 +1,65 @@
+============================================================
+     HPOP Full Perturbation Propagation Test Suite
+============================================================
+
+=== Test 1: ISS-like Orbit Propagation (24 hours) ===
+
+Comparing propagation with different perturbation models:
+Duration: 24 hours, Output step: 10 minutes
+Spacecraft: Mass=420000 kg, Area=1500 m2, Cd=2.2, Cr=1.3
+
+Running: Two-body only... Done! (1.0 ms)
+  Final position difference: 13342.138 km
+  SMA change: 0.000 km
+  Ecc change: 2.9279e-14
+Running: Two-body + J2... Done! (1.1 ms)
+  Final position difference: 13196.512 km
+  SMA change: -2.775 km
+  Ecc change: 1.0881e-03
+Running: Two-body + J2 + Drag... Done! (1.8 ms)
+  Final position difference: 13189.567 km
+  SMA change: -2.959 km
+  Ecc change: 1.0803e-03
+Running: Two-body + J2 + Drag + SRP... Done! (3.8 ms)
+  Final position difference: 13250.201 km
+  SMA change: -2.543 km
+  Ecc change: 1.1435e-03
+Running: Full (J2 + Drag + SRP + 3rd-body)... Done! (9.4 ms)
+  Final position difference: 13181.615 km
+  SMA change: -3.012 km
+  Ecc change: 1.0720e-03
+
+Trajectory data saved to results/data/full_propagation_comparison.csv
+
+=== Test 2: LEO Orbit Decay Simulation (30 days) ===
+Initial altitude: 349.86 km
+Mass: 50.00 kg, Area: 0.50 m2, Cd: 2.20
+Area-to-mass ratio: 10.00 cm2/kg
+Propagating for up to 30 days with J2 + Drag...
+Completed in 0.04 seconds
+Final altitude: 305.02 km
+Altitude loss: 44.84 km over 30.00 days
+Average decay rate: 1.49 km/day
+
+Orbit decay data saved to results/data/orbit_decay.csv
+
+=== Test 3: GEO Satellite Perturbations (30 days) ===
+GEO satellite with SRP and third-body perturbations
+Mass: 3000.00 kg, Area: 50.00 m2, Cr: 1.50
+Completed in 0.05 seconds
+Inclination drift: 0.02 deg/month
+Eccentricity change: 1.48e-04
+
+GEO data saved to results/data/geo_perturbations.csv
+
+=== Test 4: Propagator Performance Benchmark ===
+
+Performance for 24-hour propagation:
+Configuration          | Time (ms) | Steps/sec
+-----------------------+-----------+----------
+RK4                    | 3.1       | 465278.7
+RKF78                  | 8.8       | 164030.3
+
+============================================================
+                    All Tests Complete
+============================================================
