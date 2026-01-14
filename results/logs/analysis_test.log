@@ -1,0 +1,120 @@
+============================================================
+     HPOP Analysis Module Test Suite
+============================================================
+
+============================================================
+     Ground Station Contact Prediction Test
+============================================================
+
+Satellite: ISS-like orbit
+  Altitude: 399.863 km
+  Inclination: 51.64 deg
+
+Ground Stations:
+  DAEJEON (Daejeon Ground Station): 36.35N, 127.38E
+  SVALBARD (Svalbard Satellite Station): 78.23N, 15.39E
+  CANBERRA (Canberra DSN): -35.4N, 148.98E
+  GOLDSTONE (Goldstone DSN): 35.43N, -116.89E
+
+Generating 24-hour trajectory...
+Trajectory generated in 2.5 ms (1441 points)
+
+Predicting contacts...
+Contact prediction completed in 2.4 ms
+
+=== Contact Windows (24 hours) ===
+   Station |    AOS (UTC) |    LOS (UTC) | Duration |  MaxEl
+------------------------------------------------------------
+   DAEJEON | 00:10:00 | 00:18:00 |   8.0 min | 49.7 deg
+ GOLDSTONE | 00:33:59 | 00:40:00 |   6.0 min | 15.4 deg
+   DAEJEON | 01:48:00 | 01:52:59 |   5.0 min | 10.4 deg
+   DAEJEON | 03:27:59 | 03:29:00 |   1.0 min |  5.1 deg
+   DAEJEON | 05:03:00 | 05:08:59 |   6.0 min | 10.0 deg
+   DAEJEON | 06:38:59 | 06:46:59 |   8.0 min | 49.5 deg
+   DAEJEON | 08:15:59 | 08:21:00 |   5.0 min | 12.0 deg
+  CANBERRA | 08:36:00 | 08:38:59 |   3.0 min |  6.2 deg
+  CANBERRA | 10:08:59 | 10:17:00 |   8.0 min | 63.1 deg
+  CANBERRA | 11:47:00 | 11:52:59 |   6.0 min | 12.1 deg
+  CANBERRA | 15:02:59 | 15:07:00 |   4.0 min |  6.4 deg
+ GOLDSTONE | 15:32:00 | 15:40:00 |   8.0 min | 57.0 deg
+  CANBERRA | 16:38:00 | 16:45:59 |   8.0 min | 26.1 deg
+ GOLDSTONE | 17:08:59 | 17:15:59 |   7.0 min | 15.3 deg
+  CANBERRA | 18:14:59 | 18:22:00 |   7.0 min | 24.4 deg
+ GOLDSTONE | 20:26:59 | 20:27:59 |   1.0 min |  5.5 deg
+ GOLDSTONE | 22:00:59 | 22:07:59 |   7.0 min | 19.7 deg
+   DAEJEON | 23:14:00 | 23:22:00 |   8.0 min | 53.7 deg
+ GOLDSTONE | 23:37:00 | 23:45:00 |   8.0 min | 34.4 deg
+
+Total contacts: 19
+
+Contact data saved to results/data/contact_windows.csv
+Ground track saved to results/data/ground_track.csv
+
+============================================================
+     Satellite Proximity Analysis Test
+============================================================
+
+Primary Satellite: ISS-like orbit
+Secondary Satellite: 500m higher, slightly different orientation
+Orbital period: 92.56 minutes
+
+Generating trajectories (1 orbit, 10s steps)...
+Trajectories generated in 1.8 ms
+
+Analyzing proximity...
+
+=== Closest Approach Analysis ===
+Analysis completed in 0.1 ms
+
+Time of Closest Approach: 2024-06-21 01:10:20 UTC
+Miss Distance: 67137.3 m
+Relative Velocity: 76.532 m/s
+
+Relative Position (LVLH):
+  R-bar (radial):      69.2 m
+  V-bar (along-track): 66750.7 m
+  H-bar (cross-track): -7194.4 m
+
+Risk Assessment:
+  Collision Probability: 0.00e+00
+  Requires Maneuver: NO
+
+=== Conjunction Summary ===
+Total Conjunctions: 0
+Risk Level: NOMINAL
+  High Risk (< 1 km):   0
+  Medium Risk (1-5 km): 0
+  Low Risk (5-25 km):   0
+
+Proximity data saved to results/data/proximity_analysis.csv
+
+============================================================
+     Rendezvous Planning Test (CW Equations)
+============================================================
+
+Reference Orbit:
+  Altitude: 4.00e+02 km
+  Period: 9.3e+01 minutes
+  Mean motion: 1.131367e-03 rad/s
+
+Initial Relative State (LVLH):
+  R-bar: -1.000000e+02 m (radial)
+  V-bar: -1.000000e+04 m (along-track)
+  H-bar: 0.000000e+00 m (cross-track)
+
+=== Natural Drift Prediction (CW Equations) ===
+t=0.0e+00 min: R=-1.0e+02 m, V=-1.0e+04 m, H=0.0e+00 m, Range= 1.0e+04 m
+t=2.3e+01 min: R=-4.0e+02 m, V=-9.7e+03 m, H=0.0e+00 m, Range= 9.7e+03 m
+t=4.6e+01 min: R=-7.0e+02 m, V=-8.1e+03 m, H=0.0e+00 m, Range= 8.1e+03 m
+t=6.9e+01 min: R=-4.0e+02 m, V=-6.6e+03 m, H=-0.0e+00 m, Range= 6.6e+03 m
+t=9.3e+01 min: R=-1.0e+02 m, V=-6.2e+03 m, H=0.0e+00 m, Range= 6.2e+03 m
+
+CW motion data saved to results/data/cw_motion.csv
+
+=== Rendezvous Maneuver Planning ===
+V-bar approach (10 km): Delta-V = 7.203e+00 m/s
+R-bar correction (100 m): Delta-V = 5.6568e-02 m/s
+
+============================================================
+                    All Tests Complete
+============================================================
