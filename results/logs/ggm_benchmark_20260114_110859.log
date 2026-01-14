@@ -1,0 +1,43 @@
+=== GGM Model Performance Test ===
+
+| nmax | Coeffs | Load    | Per Call  | Throughput | Gravity |
+|------|--------|---------|-----------|------------|---------|
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=10, coeffs=66)
+|   10 |     66 |     72 ms |     0.55 us |    1809955/s | 8.430811 m/s^2 |
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=20, coeffs=231)
+|   20 |    231 |     73 ms |     2.14 us |     466701/s | 8.430808 m/s^2 |
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=30, coeffs=496)
+|   30 |    496 |     75 ms |     4.97 us |     201151/s | 8.430808 m/s^2 |
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+|   50 |   1326 |     75 ms |    15.65 us |      63907/s | 8.430808 m/s^2 |
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=70, coeffs=2556)
+|   70 |   2556 |     75 ms |    34.67 us |      28847/s | 8.430808 m/s^2 |
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=100, coeffs=5151)
+|  100 |   5151 |     75 ms |    83.09 us |      12036/s | 8.430808 m/s^2 |
+
+=== OpenMP Parallel Test (nmax=50) ===
+Max threads: 16
+
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+[GGMModel] Loaded: /home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc (nmax=50, coeffs=1326)
+| Threads | Time (ms) | Speedup |
+|---------|-----------|----------|
+|       1 |   1582.86 |     1.00x |
+|       2 |    849.52 |     1.86x |
+|       4 |    443.52 |     3.57x |
+|       8 |    256.15 |     6.18x |
+|      16 |   1799.30 |     0.88x |

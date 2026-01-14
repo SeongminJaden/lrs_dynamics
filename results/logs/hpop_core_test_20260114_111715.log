@@ -1,0 +1,78 @@
+========================================
+   HPOP Core Library Test Suite
+========================================
+
+=== Orbital Elements Conversion Test ===
+
+Original Orbital Elements:
+  SMA: 6778 km
+  ECC: 0.0001
+  INC: 51.6 deg
+  RAAN: 0 deg
+  AOP: 0 deg
+  TA: 0 deg
+  Period: 92.5576 min
+
+State Vector:
+  Position: [6777.322, 0.000, 0.000] km
+  Velocity: [-0.000000, 4.763832, 6.010461] km/s
+  Radius: 6777.322200 km
+  Speed: 7.669403 km/s
+
+Converted back:
+  SMA error: 0.000000 m
+  ECC error: 0.000000
+  INC error: 0.000000 deg
+
+=== Coordinate Frame Conversion Test ===
+
+Daejeon Station:
+  Geodetic: lat=36.350000 deg, lon=127.380000 deg, alt=100.000000 m
+  ECEF: [-3122.402172, 4086.888339, 3759.600649] km
+  Round-trip error:
+    Lat: 0.000000 arcsec
+    Lon: 0.000000 arcsec
+    Alt: 0.000004 m
+
+ECI <-> ECEF Test:
+  Position round-trip error: 0.000000 m
+  Velocity round-trip error: 0.000000 m/s
+
+=== Orbit Propagator Test ===
+
+Integrator: RK4
+  Propagation time: 0.025708 ms
+  Trajectory points: 93
+  Period closure error:
+    Position: 28.782416 m
+    Velocity: 0.032444 m/s
+
+  Saved trajectory to: /home/seongmin/ros2_ws/src/lrs_dynamics/results/data/RK4_trajectory.csv
+
+Integrator: RKF78
+  Propagation time: 0.015750 ms
+  Trajectory points: 37
+  Period closure error:
+    Position: 1147931.509656 m
+    Velocity: 1298.899772 m/s
+
+  Saved trajectory to: /home/seongmin/ros2_ws/src/lrs_dynamics/results/data/RKF78_trajectory.csv
+
+
+=== J2 Perturbation Effect Test ===
+
+1-day propagation with J2:
+  Computation time: 0.553575 ms
+  Trajectory points: 940
+
+Orbital element changes:
+  RAAN drift: 359.021926 deg
+  AOP drift: 352.810965 deg
+  SMA change: 1329.496414 m
+  Expected RAAN drift: 0.987153 deg
+
+Saved J2 propagation to: /home/seongmin/ros2_ws/src/lrs_dynamics/results/data/j2_propagation.csv
+
+========================================
+   All tests completed!
+========================================
