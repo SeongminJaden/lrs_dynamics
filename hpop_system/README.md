@@ -438,12 +438,115 @@ ros2 service call /rendezvous/start std_srvs/srv/Trigger
 
 ---
 
+## GGM05C Gravity Model Analysis
+
+### Model Parameters
+
+| 항목 | 값 | 비고 |
+|------|-----|------|
+| 모델 | GGM05C | NASA/GFZ 2016 |
+| 차수 (nmax) | 70 | 2,556 계수 |
+| GM | 3.986×10¹⁴ m³/s² | WGS84 |
+| 지구 반경 | 6,378,136.3 m | 적도 반경 |
+| J2 | 1.08263×10⁻³ | 지배적 섭동 |
+| 400km 적도 중력 | 8.6816 m/s² | GGM05C |
+| 400km 극점 중력 | 8.6648 m/s² | GGM05C |
+| 적도-극점 차이 | 1,672 mGal | ~0.02% |
+| 계산 속도 | ~50 μs/call | nmax=70, single thread |
+
+### Visualization Figures
+
+#### 1. ggm05c_gravity_vs_altitude (고도별 중력 변화)
+
+![Gravity vs Altitude](../data/figures/ggm05c_gravity_vs_altitude.png)
+
+**(a) Gravity vs Altitude at Equator**
+- X축: 고도 (200-2000 km), Y축: 중력 가속도 (m/s²)
+- 파란 실선: GGM05C (nmax=70), 빨간 점선: 점질량 모델
+- 고도 증가 시 중력 감소 (역제곱 법칙): 200km에서 ~9.2 m/s², 2000km에서 ~5.7 m/s²
+
+**(b) GGM05C - Point Mass Difference**
+- 지구 비구면성(J2 등)에 의한 중력 편차 (mGal 단위)
+- 적도에서 양의 이상 (+633 mGal at 200km)
+- **의미**: 저궤도에서 비구면 중력장 효과가 크며, 고정밀 궤도 전파에 필수
+
+---
+
+#### 2. ggm05c_gravity_vs_latitude (위도별 중력 변화)
+
+![Gravity vs Latitude](../data/figures/ggm05c_gravity_vs_latitude.png)
+
+**(a) Gravity vs Latitude at 400km**
+- 적도: 중력 최대 (~8.68 m/s²), 극점: 중력 최소 (~8.66 m/s²)
+- 점질량 모델은 위도 무관, GGM05C는 J2 효과로 위도별 변화 표현
+
+**(b) Latitude-dependent Gravity Anomaly (J2 effect)**
+- 적도 (+561 mGal): 지구 적도 부풀음(oblateness)으로 중력 증가
+- 극점 (-1110 mGal): 지구 편평화로 중력 감소
+- **총 차이: ~1672 mGal** (적도-극점)
+- **의미**: J2 섭동이 지배적, ISS 궤도(51.6°)에서 주기적 변동 발생
+
+---
+
+#### 3. ggm05c_global_anomaly_map (전역 중력 이상 지도)
+
+![Global Anomaly Map](../data/figures/ggm05c_global_anomaly_map.png)
+
+- 400km 고도에서의 전지구 중력장 분포
+- 컬러맵: 빨강=양의 이상(적도), 파랑=음의 이상(극지방)
+- 경도 방향 변화는 작음 (J2 = 축대칭 효과가 지배적)
+- **의미**: GGM05C nmax=70은 지구 중력장의 주요 특성 포착
+
+---
+
+#### 4. ggm05c_leo_orbit_gravity (LEO 궤도 중력 변화)
+
+![LEO Orbit Gravity](../data/figures/ggm05c_leo_orbit_gravity.png)
+
+**(a) ISS-like Orbit Ground Track**
+- ISS 궤도 (420km, 51.6° 경사각)의 지상 궤적
+- 색상: 각 위치에서의 중력 이상
+
+**(b) Gravity Along ISS Orbit**
+- 1 궤도 동안 중력 변동: 8.65 ~ 8.68 m/s²
+- 적도 통과 시 최대, 최고위도(±51.6°) 도달 시 최소
+- 주기: 궤도당 2회 진동
+
+**(c) Gravity Anomaly Along Orbit**
+- 범위: -800 ~ +550 mGal (총 ~1400 mGal 변동)
+
+**(d) Anomaly vs Latitude**
+- 위도와 중력 이상의 명확한 2차 함수 패턴 (J2의 P₂(sin φ) 특성)
+- **의미**: 위성은 1 궤도마다 ~1400 mGal의 중력 변동 경험
+
+---
+
+#### 5. ggm05c_j2_comparison (GGM05C vs J2 비교)
+
+![J2 Comparison](../data/figures/ggm05c_j2_comparison.png)
+
+- 파란 실선: GGM05C (nmax=70, 2556 계수)
+- 빨간 점선: J2-only 해석해
+- 연녹색 영역: 고차항(J3, J4, ..., tesseral) 기여분
+
+**J2-only 근사식:**
+```
+Δg ≈ (3/2) × J2 × (Rₑ/r)² × (GM/r²) × (3sin²φ - 1)
+```
+
+- J2 항만으로 중력 이상의 **~95%** 설명 가능
+- 고차항은 미세 보정 역할 (수십 mGal)
+- **의미**: 빠른 계산 시 J2-only 사용, 고정밀 필요시 GGM05C 사용
+
+---
+
 ## References
 
 1. Vallado, D. A. "Fundamentals of Astrodynamics and Applications"
 2. Montenbruck, O. & Gill, E. "Satellite Orbits: Models, Methods, Applications"
 3. ROS2 Humble Documentation
 4. Gazebo Classic Documentation
+5. Ries, J. et al. (2016): "The Combined Gravity Model GGM05C", GFZ Data Services
 
 ---
 
