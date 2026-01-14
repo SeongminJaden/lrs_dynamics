@@ -1,0 +1,137 @@
+============================================================
+     HPOP Maneuver Planning Test Suite
+============================================================
+
+============================================================
+     Hohmann Transfer Test
+============================================================
+
+=== Test 1: LEO (400 km) to MEO (20,200 km) ===
+Initial altitude: 400 km
+Target altitude: 20,200 km
+
+Description: Hohmann transfer (raise orbit)
+Total Delta-V: 3415.864 m/s
+Transfer Time: 2.98 hours
+Burns:
+  1. Hohmann burn 1 (departure): 2012.040 m/s
+  2. Hohmann burn 2 (arrival): 1403.823 m/s
+
+=== Test 2: LEO (400 km) to GEO (35,786 km) ===
+Initial altitude: 400 km
+Target altitude: 35,786 km
+
+Description: Hohmann transfer (raise orbit)
+Total Delta-V: 3853.957 m/s
+Transfer Time: 5.29 hours
+Burns:
+  1. Hohmann burn 1 (departure): 2397.470 m/s
+  2. Hohmann burn 2 (arrival): 1456.487 m/s
+
+=== Test 3: ISS Reboost (400 km to 420 km) ===
+Description: Hohmann transfer (raise orbit)
+Total Delta-V: 11.289 m/s
+Transfer Time: 0.77 hours
+Burns:
+  1. Hohmann burn 1 (departure): 5.646 m/s
+  2. Hohmann burn 2 (arrival): 5.642 m/s
+
+=== Test 4: Hohmann vs Bi-elliptic Comparison ===
+LEO (200 km) to very high orbit (100,000 km)
+Altitude ratio: 16.2
+
+Hohmann Transfer:
+Description: Hohmann transfer (raise orbit)
+Total Delta-V: 4174.087 m/s
+Transfer Time: 18.55 hours
+Burns:
+  1. Hohmann burn 1 (departure): 2898.989 m/s
+  2. Hohmann burn 2 (arrival): 1275.097 m/s
+
+Bi-elliptic Transfer:
+Description: Bi-elliptic transfer via 1595672.055000 km
+Total Delta-V: 4048.016 m/s
+Transfer Time: 2076.28 hours
+Burns:
+  1. Bi-elliptic burn 1 (departure): 3201.725 m/s
+  2. Bi-elliptic burn 2 (intermediate): 131.417 m/s
+  3. Bi-elliptic burn 3 (arrival): 714.874 m/s
+
+Delta-V Savings: 126.1 m/s (3.0%)
+
+Hohmann transfer data saved to results/data/hohmann_transfers.csv
+
+============================================================
+     Plane Change Maneuver Test
+============================================================
+
+=== ISS Orbit (51.64 deg) to Polar (90 deg) ===
+Description: Plane change: 51.640000 -> 90.000000 deg
+Total Delta-V: 5038.861 m/s
+Burns:
+  1. Inclination change at node: 5038.861 m/s
+
+=== Small Inclination Change (1 degree) ===
+Orbital velocity: 7668.6 m/s
+Delta-V for 1 deg change: 133.841 m/s
+
+=== GEO Inclination Correction (0.05 deg) ===
+GEO orbital velocity: 3074.7 m/s
+Delta-V for 0.05 deg correction: 2.683 m/s
+
+============================================================
+     GEO Station Keeping Budget
+============================================================
+
+Satellite: 3000.000 kg, 50.000 m^2, Cr=1.500
+Annual delta-V budget: 52.0 m/s/year
+15-year mission total: 780.2 m/s
+
+Inclination drift (0.1 deg) correction: 5.366 m/s
+
+============================================================
+     Phasing Maneuver Test
+============================================================
+
+=== Catch up 30 deg in 3 orbits ===
+Description: Phasing maneuver: 30.000000 deg in 3 orbits
+Total Delta-V: 146.078 m/s
+Transfer Time: 4.50 hours
+Burns:
+  1. Phasing burn 1 (enter phasing orbit): 73.039 m/s
+  2. Phasing burn 2 (return to original orbit): 73.039 m/s
+
+=== Fall back 10 deg in 1 orbit ===
+Description: Phasing maneuver: -10.000000 deg in 1 orbits
+Total Delta-V: 138.181 m/s
+Transfer Time: 1.59 hours
+Burns:
+  1. Phasing burn 1 (enter phasing orbit): 69.091 m/s
+  2. Phasing burn 2 (return to original orbit): 69.091 m/s
+
+============================================================
+     Lambert Solver Test
+============================================================
+
+=== Simple Lambert Transfer ===
+Initial position: (6778.000, 0.000, 0.000) km
+Target position: (0.000, 7000.000, 500.000) km
+Time of flight: 30.000 minutes
+
+Solution converged!
+Transfer velocity at departure: (2616.354, 6548.662, 467.762) m/s
+Transfer velocity at arrival: (-6340.976, 2385.905, 170.422) m/s
+
+Departure delta-V: 2884.702 m/s
+Arrival delta-V: 9981.144 m/s
+Total delta-V: 12865.846 m/s
+
+=== Rendezvous Scenario ===
+Chaser at: (6778.000, 0.000) km
+Target at: (6744.138, 676.671) km
+
+Lambert solutions saved to results/data/lambert_solutions.csv
+
+============================================================
+                    All Tests Complete
+============================================================
