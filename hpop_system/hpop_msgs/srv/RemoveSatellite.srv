@@ -1,0 +1,10 @@
+# Remove a satellite from the propagator
+
+# Request
+string satellite_id          # ID of satellite to remove
+bool remove_all              # If true, remove all satellites
+---
+# Response
+bool success
+string message
+string[] removed_ids         # List of removed satellite IDs

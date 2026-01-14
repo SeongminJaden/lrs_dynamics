@@ -4,11 +4,12 @@
 #include <ignition/math/Vector3.hh>
 
 #include "gazebo_leo_gravity/ggm_model.hpp"
-#include "gazebo_leo_gravity/legendre.hpp"
 
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_set>
+#include <omp.h>
 
 namespace gazebo_leo_gravity
 {
@@ -16,68 +17,133 @@ namespace gazebo_leo_gravity
 class LeoGravityWorldPlugin : public gazebo::WorldPlugin
 {
 public:
-    LeoGravityWorldPlugin() : update_counter_(0) {}
-    virtual ~LeoGravityWorldPlugin() {}
+    LeoGravityWorldPlugin() = default;
+    ~LeoGravityWorldPlugin() override = default;
 
-void Load(gazebo::physics::WorldPtr _world, sdf::ElementPtr _sdf) override
-{
-    world_ = _world;
-
-    world_->SetGravity(ignition::math::Vector3d(0,0,0));
-
-    int nmax = 20;
-    if (_sdf->HasElement("nmax"))
-        nmax = _sdf->Get<int>("nmax");
-
-    std::string ggm_file = "/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc";
-    if (_sdf->HasElement("ggm_file"))
-        ggm_file = _sdf->Get<std::string>("ggm_file");
-
-    if (!ggm_model_.load(ggm_file, nmax))
+    void Load(gazebo::physics::WorldPtr world, sdf::ElementPtr sdf) override
     {
-        gzerr << "[LeoGravityWorldPlugin] Failed to load GGM05C file.\n";
-        return;
-    }
+        world_ = world;
 
-    for (auto model : world_->Models())
-    {
-        if (!model->IsStatic())
-            dynamic_models_.push_back(model);
-    }
+        // Disable default gravity
+        world_->SetGravity(ignition::math::Vector3d::Zero);
 
-    update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
-        std::bind(&LeoGravityWorldPlugin::OnUpdate, this));
-}
+        // Read configuration from SDF
+        int nmax = 20;
+        if (sdf->HasElement("nmax"))
+            nmax = sdf->Get<int>("nmax");
 
-    void OnUpdate()
-    {
+        if (sdf->HasElement("update_rate"))
+            update_skip_ = static_cast<int>(1000.0 / sdf->Get<double>("update_rate"));
 
-        update_counter_++;
-        if (update_counter_ % 10 != 0) return;
+        // OpenMP thread count
+        int num_threads = omp_get_max_threads();
+        if (sdf->HasElement("threads"))
+            num_threads = sdf->Get<int>("threads");
+        omp_set_num_threads(num_threads);
 
-        for (auto model : dynamic_models_)
+        std::string ggm_file = "/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc";
+        if (sdf->HasElement("ggm_file"))
+            ggm_file = sdf->Get<std::string>("ggm_file");
+
+        // Create per-thread GGM models for thread safety
+        ggm_models_.resize(num_threads);
+        for (int i = 0; i < num_threads; ++i)
         {
-            if (!model || !model->GetLink()) continue;
-
-            ignition::math::Vector3d pos = model->WorldPose().Pos();
-            ignition::math::Vector3d grav_acc = ggm_model_.acceleration(pos);
-
-            double mass = model->GetLink()->GetInertial()->Mass();
-            ignition::math::Vector3d force = grav_acc * mass;
-
-            model->GetLink()->AddForce(force);
+            if (!ggm_models_[i].load(ggm_file, nmax))
+            {
+                gzerr << "[LeoGravityWorldPlugin] Failed to load GGM file: " << ggm_file << "\n";
+                return;
+            }
         }
+
+        gzmsg << "[LeoGravityWorldPlugin] Initialized: nmax=" << nmax
+              << ", threads=" << num_threads
+              << ", update_skip=" << update_skip_ << "\n";
+
+        // Initial model scan
+        RefreshDynamicModels();
+
+        // Register callbacks
+        update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
+            std::bind(&LeoGravityWorldPlugin::OnUpdate, this));
+
+        add_connection_ = gazebo::event::Events::ConnectAddEntity(
+            std::bind(&LeoGravityWorldPlugin::OnModelAdded, this, std::placeholders::_1));
     }
 
 private:
+    void OnUpdate()
+    {
+        ++update_counter_;
+        if (update_counter_ % update_skip_ != 0) return;
+
+        // Periodic refresh
+        if (update_counter_ % (update_skip_ * 100) == 0)
+            RefreshDynamicModels();
+
+        const int n_models = static_cast<int>(dynamic_models_.size());
+        if (n_models == 0) return;
+
+        // OpenMP parallel loop over models
+        #pragma omp parallel for schedule(dynamic)
+        for (int i = 0; i < n_models; ++i)
+        {
+            auto& model = dynamic_models_[i];
+            if (!model) continue;
+
+            auto link = model->GetLink();
+            if (!link) continue;
+
+            const int tid = omp_get_thread_num();
+            const ignition::math::Vector3d pos = model->WorldPose().Pos();
+            const ignition::math::Vector3d grav_acc = ggm_models_[tid].acceleration(pos);
+
+            const double mass = link->GetInertial()->Mass();
+            link->AddForce(grav_acc * mass);
+        }
+    }
+
+    void OnModelAdded(const std::string& entity_name)
+    {
+        auto model = world_->ModelByName(entity_name);
+        if (model && !model->IsStatic())
+        {
+            if (tracked_models_.find(entity_name) == tracked_models_.end())
+            {
+                dynamic_models_.push_back(model);
+                tracked_models_.insert(entity_name);
+                gzmsg << "[LeoGravityWorldPlugin] Tracking: " << entity_name << "\n";
+            }
+        }
+    }
+
+    void RefreshDynamicModels()
+    {
+        dynamic_models_.clear();
+        tracked_models_.clear();
+
+        for (auto& model : world_->Models())
+        {
+            if (model && !model->IsStatic())
+            {
+                dynamic_models_.push_back(model);
+                tracked_models_.insert(model->GetName());
+            }
+        }
+    }
+
     gazebo::physics::WorldPtr world_;
     gazebo::event::ConnectionPtr update_connection_;
-    GGMModel ggm_model_;
+    gazebo::event::ConnectionPtr add_connection_;
+
+    std::vector<GGMModel> ggm_models_;  // Per-thread models
     std::vector<gazebo::physics::ModelPtr> dynamic_models_;
-    int update_counter_;
+    std::unordered_set<std::string> tracked_models_;
+
+    int update_counter_ = 0;
+    int update_skip_ = 10;
 };
 
 GZ_REGISTER_WORLD_PLUGIN(LeoGravityWorldPlugin)
 
 } // namespace gazebo_leo_gravity
-

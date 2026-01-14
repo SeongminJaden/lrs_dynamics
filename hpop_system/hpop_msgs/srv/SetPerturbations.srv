@@ -1,0 +1,47 @@
+# Configure perturbation models
+
+# Request
+# Gravity model
+bool gravity_enabled
+uint32 gravity_degree        # Spherical harmonic degree (2-360)
+string gravity_model         # Model name: GGM05C, EGM2008, etc.
+
+# Atmospheric drag
+bool drag_enabled
+string atmosphere_model      # Model: exponential, nrlmsise00, jb2008
+
+# Solar radiation pressure
+bool srp_enabled
+bool srp_shadow_model        # Enable shadow/penumbra calculation
+
+# Third body perturbations
+bool third_body_moon_enabled
+bool third_body_sun_enabled
+string ephemeris_source      # DE430, DE440, analytical
+
+# Tidal effects
+bool solid_tides_enabled
+bool ocean_tides_enabled
+
+# Relativistic effects
+bool relativistic_enabled
+
+# Space weather (for drag models)
+float64 f107_value           # F10.7 solar flux (0 = auto from space weather)
+float64 f107_avg             # 81-day average F10.7
+float64 ap_value             # Ap geomagnetic index
+bool auto_space_weather      # Automatically fetch space weather data
+---
+# Response
+bool success
+string message
+
+# Current configuration after update
+bool gravity_enabled
+uint32 gravity_degree
+bool drag_enabled
+string atmosphere_model
+bool srp_enabled
+bool third_body_moon_enabled
+bool third_body_sun_enabled
+bool solid_tides_enabled

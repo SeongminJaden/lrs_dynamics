@@ -1,0 +1,28 @@
+# Add a satellite to the propagator
+
+# Request
+string satellite_id          # Unique identifier for this satellite
+
+# Initial state (provide ONE of these)
+hpop_msgs/TLEData tle        # Option 1: TLE data
+hpop_msgs/OrbitalElements elements  # Option 2: Orbital elements
+geometry_msgs/Point position # Option 3: Cartesian state
+geometry_msgs/Vector3 velocity
+builtin_interfaces/Time epoch  # Epoch for state
+
+# Physical properties
+float64 mass                 # [kg] Spacecraft mass (default: 1000)
+float64 cross_section_drag   # [m^2] Drag cross-section (default: 10)
+float64 cross_section_srp    # [m^2] SRP cross-section (default: 10)
+float64 drag_coefficient     # [-] Cd (default: 2.2)
+float64 reflectivity_coeff   # [-] Cr (default: 1.5)
+
+# Optional metadata
+string name                  # Human-readable name
+uint32 norad_id              # NORAD ID (0 if not assigned)
+---
+# Response
+bool success
+string message
+string satellite_id          # Confirmed satellite ID
+hpop_msgs/SatelliteState initial_state  # Initial state after addition

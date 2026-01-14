@@ -1,11 +1,10 @@
 #include "gazebo_leo_gravity/ggm_model.hpp"
-#include "gazebo_leo_gravity/legendre.hpp"
 
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <cmath>
-#include <stdexcept>
+#include <algorithm>
 
 namespace gazebo_leo_gravity
 {
@@ -18,7 +17,7 @@ bool GGMModel::load(const std::string& filename, int nmax)
     std::ifstream fin(filename);
     if (!fin.is_open())
     {
-        std::cerr << "[GGMModel] Warning: Failed to open file: " << filename << std::endl;
+        std::cerr << "[GGMModel] Failed to open file: " << filename << std::endl;
         return false;
     }
 
@@ -37,13 +36,13 @@ bool GGMModel::load(const std::string& filename, int nmax)
         {
             if (line.find("earth_gravity_constant") != std::string::npos)
             {
-                std::stringstream ss(line);
+                std::istringstream ss(line);
                 std::string key;
                 ss >> key >> GM_;
             }
             else if (line.find("radius") != std::string::npos)
             {
-                std::stringstream ss(line);
+                std::istringstream ss(line);
                 std::string key;
                 ss >> key >> a_;
             }
@@ -56,7 +55,7 @@ bool GGMModel::load(const std::string& filename, int nmax)
 
         if (line.rfind("gfc", 0) == 0)
         {
-            for (auto &c : line) if (c == 'D') c = 'E';
+            std::replace(line.begin(), line.end(), 'D', 'E');
 
             std::istringstream iss(line);
             std::string tag;
@@ -69,67 +68,166 @@ bool GGMModel::load(const std::string& filename, int nmax)
         }
     }
 
-    if (GM_ == 0) GM_ = 3.986004415e14;    // [m^3/s^2]
-    if (a_ == 0)  a_ = 6378136.3;          // [m]
+    if (GM_ == 0) GM_ = 3.986004415e14;
+    if (a_ == 0)  a_ = 6378136.3;
 
-    std::cout << "[GGMModel] Loaded GGM file: " << filename
+    // Sort by degree for cache locality
+    std::sort(coeffs_.begin(), coeffs_.end(),
+        [](const Coefficient& a, const Coefficient& b) {
+            return (a.n != b.n) ? (a.n < b.n) : (a.m < b.m);
+        });
+
+    // Pre-allocate buffers
+    ensureBuffers();
+
+    std::cout << "[GGMModel] Loaded: " << filename
               << " (nmax=" << nmax_ << ", coeffs=" << coeffs_.size() << ")\n";
 
     return true;
 }
 
+void GGMModel::ensureBuffers() const
+{
+    if (static_cast<int>(a_r_pow_.size()) < nmax_ + 2)
+    {
+        a_r_pow_.resize(nmax_ + 2);
+        cosm_.resize(nmax_ + 1);
+        sinm_.resize(nmax_ + 1);
+
+        P_.resize(nmax_ + 1);
+        for (int n = 0; n <= nmax_; ++n)
+            P_[n].resize(n + 1, 0.0);
+    }
+}
+
+void GGMModel::computeLegendre(double sinphi, double cosphi) const
+{
+    // Base case
+    P_[0][0] = 1.0;
+    if (nmax_ == 0) return;
+
+    // Compute unnormalized Legendre polynomials
+    for (int n = 1; n <= nmax_; ++n)
+    {
+        // Diagonal: Pnn
+        P_[n][n] = (2*n - 1) * cosphi * P_[n-1][n-1];
+
+        // Sub-diagonal: Pn,n-1
+        P_[n][n-1] = (2*n - 1) * sinphi * P_[n-1][n-1];
+
+        // Tesseral terms
+        for (int m = 0; m <= n - 2; ++m)
+        {
+            const double Pn1m = P_[n-1][m];
+            const double Pn2m = (n >= 2 && m <= n-2) ? P_[n-2][m] : 0.0;
+            P_[n][m] = ((2*n - 1) * sinphi * Pn1m - (n + m - 1) * Pn2m) / (n - m);
+        }
+    }
+
+    // Apply normalization
+    if (normalized_)
+    {
+        for (int n = 0; n <= nmax_; ++n)
+        {
+            for (int m = 0; m <= n; ++m)
+            {
+                double ratio = 1.0;
+                for (int k = n - m + 1; k <= n + m; ++k)
+                    ratio *= k;
+
+                const double delta = (m == 0) ? 1.0 : 0.0;
+                P_[n][m] *= std::sqrt((2.0 - delta) / ratio);
+            }
+        }
+    }
+}
+
 ignition::math::Vector3d GGMModel::acceleration(const ignition::math::Vector3d& pos) const
 {
-    double x = pos.X();
-    double y = pos.Y();
-    double z = pos.Z();
+    const double x = pos.X();
+    const double y = pos.Y();
+    const double z = pos.Z();
 
-    double r = std::sqrt(x*x + y*y + z*z);
-    if (r == 0.0) return ignition::math::Vector3d::Zero;
+    const double r2 = x*x + y*y + z*z;
+    if (r2 < 1.0) return ignition::math::Vector3d::Zero;
 
-    double phi = std::asin(z / r);               
-    double lambda = std::atan2(y, x);            
+    const double r = std::sqrt(r2);
+    const double r_inv = 1.0 / r;
 
-    double cosphi = std::cos(phi);
-    double sinphi = std::sin(phi);
+    const double sinphi = z * r_inv;
+    const double cosphi = std::sqrt(1.0 - sinphi * sinphi);
+    const double lambda = std::atan2(y, x);
+    const double coslam = std::cos(lambda);
+    const double sinlam = std::sin(lambda);
 
-    LegendreTable P(nmax_, sinphi, normalized_);
+    // Precompute (a/r)^n using incremental multiplication
+    const double a_over_r = a_ * r_inv;
+    a_r_pow_[0] = 1.0;
+    for (int n = 1; n <= nmax_ + 1; ++n)
+        a_r_pow_[n] = a_r_pow_[n-1] * a_over_r;
+
+    // Precompute cos(m*lambda), sin(m*lambda) using recurrence
+    cosm_[0] = 1.0;
+    sinm_[0] = 0.0;
+    for (int m = 1; m <= nmax_; ++m)
+    {
+        cosm_[m] = cosm_[m-1] * coslam - sinm_[m-1] * sinlam;
+        sinm_[m] = sinm_[m-1] * coslam + cosm_[m-1] * sinlam;
+    }
+
+    // Compute Legendre polynomials in-place
+    computeLegendre(sinphi, cosphi);
 
     double dUdr = 0.0;
     double dUdphi = 0.0;
     double dUdlambda = 0.0;
 
-    for (auto &c : coeffs_)
+    const double cosphi_inv = (std::abs(cosphi) > 1e-15) ? (1.0 / cosphi) : 0.0;
+
+    for (const auto& c : coeffs_)
     {
-        int n = c.n;
-        int m = c.m;
-        double C = c.C;
-        double S = c.S;
+        const int n = c.n;
+        const int m = c.m;
 
-        double cosm = std::cos(m * lambda);
-        double sinm = std::sin(m * lambda);
+        const double Pnm = P_[n][m];
+        const double factor = a_r_pow_[n];
 
-        double Pnm = P.get(n, m);
+        const double CS_cosm = c.C * cosm_[m] + c.S * sinm_[m];
+        const double CS_sinm = -c.C * sinm_[m] + c.S * cosm_[m];
 
-        double factor = std::pow(a_ / r, n);
+        dUdr += (n + 1) * factor * Pnm * CS_cosm;
 
-        dUdr += (n+1) * factor * Pnm * (C * cosm + S * sinm);
-        dUdphi += factor * P.dPhi(n, m, cosphi, sinphi) * (C * cosm + S * sinm);
-        dUdlambda += factor * m * Pnm * (-C * sinm + S * cosm);
+        // Compute dP/dphi inline
+        double dPnm = 0.0;
+        if (n > 0 && cosphi_inv != 0.0)
+        {
+            if (n == m)
+            {
+                dPnm = -n * sinphi * cosphi_inv * Pnm;
+            }
+            else
+            {
+                const double Pn1m = (n > 0 && m <= n-1) ? P_[n-1][m] : 0.0;
+                dPnm = (n * sinphi * Pnm - (n + m) * Pn1m) * cosphi_inv;
+            }
+        }
+
+        dUdphi += factor * dPnm * CS_cosm;
+        dUdlambda += factor * m * Pnm * CS_sinm;
     }
 
-    double common = GM_ / (r * r);
+    const double common = GM_ / r2;
 
-    double ar = -common * dUdr;
-    double aphi = common * dUdphi;
-    double alam = common * dUdlambda;
+    const double ar   = -common * dUdr;
+    const double aphi =  common * dUdphi;
+    const double alam =  common * dUdlambda;
 
-    double ax = (ar * cosphi * cos(lambda) - aphi * sinphi * cos(lambda) - alam * sin(lambda));
-    double ay = (ar * cosphi * sin(lambda) - aphi * sinphi * sin(lambda) + alam * cos(lambda));
-    double az = (ar * sinphi + aphi * cosphi);
+    // Spherical to Cartesian transformation
+    const double ax = ar * cosphi * coslam - aphi * sinphi * coslam - alam * sinlam;
+    const double ay = ar * cosphi * sinlam - aphi * sinphi * sinlam + alam * coslam;
+    const double az = ar * sinphi + aphi * cosphi;
 
     return ignition::math::Vector3d(ax, ay, az);
 }
 
 } // namespace gazebo_leo_gravity
-

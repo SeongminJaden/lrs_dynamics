@@ -1,0 +1,25 @@
+# Propagate multiple satellites in batch
+
+# Goal
+string[] satellite_ids       # Satellites to propagate (empty = all)
+builtin_interfaces/Time target_time  # Target epoch
+float64 duration_seconds     # Alternative: duration from current epoch
+float64 output_step          # [s] Output interval (0 = final states only)
+bool parallel                # Use parallel propagation
+uint32 num_threads           # Number of threads (0 = auto)
+---
+# Result
+bool success
+string message
+
+hpop_msgs/SatelliteState[] final_states  # Final states for all satellites
+uint32 num_satellites        # Number of satellites propagated
+float64 total_propagation_time_ms  # Total wall-clock time
+float64 avg_time_per_satellite_ms  # Average time per satellite
+---
+# Feedback
+uint32 satellites_completed  # Number completed so far
+uint32 satellites_total      # Total number to propagate
+float64 progress_percent     # Overall completion percentage
+string current_satellite_id  # Currently propagating satellite
+hpop_msgs/SatelliteState latest_state  # Most recent completed state

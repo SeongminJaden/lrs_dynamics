@@ -1,0 +1,47 @@
+# Plan an orbital maneuver
+
+# Request
+string satellite_id          # Satellite to maneuver
+
+# Maneuver type
+uint8 TYPE_HOHMANN = 0       # Hohmann transfer
+uint8 TYPE_BIELLIPTIC = 1    # Bi-elliptic transfer
+uint8 TYPE_PLANE_CHANGE = 2  # Inclination/RAAN change
+uint8 TYPE_PHASING = 3       # Phase adjustment
+uint8 TYPE_RENDEZVOUS = 4    # Rendezvous with target
+uint8 TYPE_CUSTOM_DV = 5     # Custom delta-V
+uint8 maneuver_type
+
+# Target specification (interpretation depends on maneuver_type)
+# For HOHMANN/BIELLIPTIC: target altitude
+float64 target_altitude      # [m] Target altitude above Earth surface
+
+# For PLANE_CHANGE: target inclination/RAAN
+float64 target_inclination   # [deg] Target inclination
+float64 target_raan          # [deg] Target RAAN
+
+# For PHASING: target phase angle
+float64 target_phase_angle   # [deg] Desired phase angle
+uint32 num_revolutions       # Number of revolutions for phasing
+
+# For RENDEZVOUS: target satellite
+string target_satellite_id   # ID of target satellite
+float64 approach_distance    # [m] Final approach distance
+
+# For CUSTOM_DV: direct delta-V specification
+geometry_msgs/Vector3 delta_v_rtn  # [m/s] Delta-V in RTN frame
+builtin_interfaces/Time maneuver_time  # When to execute
+
+# Constraints
+float64 max_delta_v          # [m/s] Maximum allowed delta-V
+float64 earliest_time        # [s] Earliest maneuver time from now
+float64 latest_time          # [s] Latest maneuver time from now
+---
+# Response
+bool success
+string message
+
+hpop_msgs/ManeuverPlan[] maneuver_plans  # Planned maneuver sequence
+float64 total_delta_v        # [m/s] Total delta-V required
+float64 total_duration       # [s] Total maneuver sequence duration
+uint32 num_maneuvers         # Number of maneuvers in sequence

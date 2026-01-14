@@ -1,0 +1,19 @@
+# Analyze proximity events between satellites
+
+# Request
+string primary_satellite_id  # Primary satellite (empty = all pairs)
+string[] secondary_ids       # Secondary satellites/debris (empty = all)
+builtin_interfaces/Time start_time  # Analysis start time
+float64 duration_hours       # Analysis duration in hours
+float64 distance_threshold   # [m] Maximum distance to report (default: 10000)
+float64 time_step            # [s] Analysis time step (default: 60)
+bool include_probability     # Calculate collision probability (slower)
+---
+# Response
+bool success
+string message
+
+hpop_msgs/ProximityEvent[] events  # Detected proximity events
+uint32 total_events          # Total events found
+uint32 high_risk_events      # Events with collision probability > threshold
+float64 closest_approach     # [m] Minimum distance across all events

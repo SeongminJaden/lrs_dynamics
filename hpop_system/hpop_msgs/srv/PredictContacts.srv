@@ -1,0 +1,17 @@
+# Predict ground station contacts
+
+# Request
+string[] satellite_ids       # Satellites to analyze (empty = all)
+string[] station_ids         # Ground stations to check (empty = all)
+builtin_interfaces/Time start_time  # Analysis start time
+float64 duration_hours       # Analysis duration in hours
+float64 min_elevation        # [deg] Override minimum elevation (0 = use station default)
+float64 time_step            # [s] Analysis time step (default: 60)
+---
+# Response
+bool success
+string message
+
+hpop_msgs/ContactWindow[] contacts  # Predicted contact windows
+uint32 total_contacts        # Total number of contacts found
+float64 total_contact_time   # [s] Total contact time across all windows

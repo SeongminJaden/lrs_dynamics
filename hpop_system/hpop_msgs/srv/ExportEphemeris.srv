@@ -1,0 +1,29 @@
+# Export ephemeris data to various formats
+
+# Request
+string satellite_id          # Satellite to export (empty = all)
+builtin_interfaces/Time start_time  # Export start time
+float64 duration_hours       # Export duration in hours
+float64 step_size            # [s] Output step size
+
+# Output format
+uint8 FORMAT_CSV = 0         # CSV format
+uint8 FORMAT_OEM = 1         # CCSDS OEM (Orbit Ephemeris Message)
+uint8 FORMAT_TLE = 2         # Two-Line Elements
+uint8 FORMAT_STK = 3         # STK ephemeris format
+uint8 FORMAT_JSON = 4        # JSON format
+uint8 format
+
+# Output options
+string output_path           # File path (empty = return in response)
+string frame_id              # Output frame: ECI_J2000, ECEF_ITRF, etc.
+bool include_covariance      # Include covariance data
+bool include_acceleration    # Include acceleration data
+---
+# Response
+bool success
+string message
+
+string file_path             # Path to exported file
+uint32 num_records           # Number of ephemeris records
+string ephemeris_data        # Ephemeris data if output_path was empty

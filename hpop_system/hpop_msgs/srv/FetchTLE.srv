@@ -1,0 +1,16 @@
+# Fetch TLE data from Celestrak or other sources
+
+# Request
+uint32[] norad_ids           # List of NORAD catalog IDs to fetch
+string[] satellite_names     # Alternative: fetch by name (search)
+string source                # TLE source: "celestrak", "spacetrack", "file"
+string file_path             # Path to TLE file (if source is "file")
+bool update_existing         # Update if satellite already loaded
+---
+# Response
+bool success                 # True if all TLEs fetched successfully
+string message               # Status message or error description
+
+hpop_msgs/TLEData[] tle_data # Fetched TLE data
+uint32[] failed_ids          # NORAD IDs that failed to fetch
+string[] failure_reasons     # Reasons for failures

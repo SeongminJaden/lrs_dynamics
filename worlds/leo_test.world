@@ -1,19 +1,54 @@
 <sdf version="1.6">
   <world name="leo_world">
     <physics type="ode">
-      <gravity>0 0 0</gravity> <!-- Disable default Earth gravity -->
+      <gravity>0 0 0</gravity>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <max_step_size>0.001</max_step_size>
       <ode>
         <solver>
           <type>quick</type>
+          <iters>50</iters>
         </solver>
       </ode>
     </physics>
 
-
     <!-- World plugin for LEO gravity -->
-<plugin name="leo_gravity" filename="libleo_gravity_world_plugin.so">
-    <ggm_file>/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc</ggm_file>
-    <nmax>20</nmax>
-</plugin>
+    <plugin name="leo_gravity" filename="libleo_gravity_world_plugin.so">
+      <ggm_file>/home/seongmin/ros2_ws/install/rsds/share/rsds/data/GGM05C.gfc</ggm_file>
+      <nmax>50</nmax>
+      <threads>8</threads>
+      <update_rate>100</update_rate>
+    </plugin>
+
+    <!-- Satellite at LEO 500km altitude (ECEF X-axis) -->
+    <!-- Earth radius: 6378136.3m + 500km = 6878136.3m -->
+    <model name="satellite_1">
+      <static>false</static>
+      <pose>6878136.3 0 0 0 0 0</pose>
+      <link name="body">
+        <inertial>
+          <mass>500.0</mass>
+          <inertia>
+            <ixx>166.67</ixx>
+            <iyy>166.67</iyy>
+            <izz>166.67</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box><size>2 2 2</size></box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.2 0.8 1</ambient>
+          </material>
+        </visual>
+        <collision name="collision">
+          <geometry>
+            <box><size>2 2 2</size></box>
+          </geometry>
+        </collision>
+      </link>
+    </model>
+
   </world>
 </sdf>

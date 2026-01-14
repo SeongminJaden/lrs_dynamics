@@ -1,0 +1,23 @@
+# Propagate a single satellite orbit
+
+# Goal
+string satellite_id          # Satellite to propagate
+builtin_interfaces/Time target_time  # Target epoch to propagate to
+float64 duration_seconds     # Alternative: duration from current epoch
+float64 output_step          # [s] Output interval (0 = final state only)
+bool real_time               # Propagate in real-time (wait between steps)
+---
+# Result
+bool success
+string message
+
+hpop_msgs/SatelliteState final_state    # Final state at target time
+hpop_msgs/SatelliteState[] trajectory   # Trajectory states (if output_step > 0)
+uint32 num_steps             # Number of integration steps
+float64 propagation_time_ms  # Wall-clock time for propagation
+---
+# Feedback
+hpop_msgs/SatelliteState current_state  # Current state during propagation
+float64 progress_percent     # Completion percentage (0-100)
+float64 elapsed_sim_time     # Elapsed simulation time
+float64 remaining_sim_time   # Remaining simulation time
