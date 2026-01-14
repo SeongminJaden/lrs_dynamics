@@ -171,7 +171,14 @@ void OrbitDisplay::unsubscribe()
 
 void OrbitDisplay::processMessage(const hpop_msgs::msg::SatelliteState::SharedPtr msg)
 {
+    // Use satellite_id, fallback to name if empty
     std::string id = msg->satellite_id;
+    if (id.empty()) {
+        id = msg->name;
+    }
+    if (id.empty()) {
+        return;  // Skip if no valid ID
+    }
 
     // Create orbit if new satellite
     if (orbits_.find(id) == orbits_.end())
@@ -179,11 +186,11 @@ void OrbitDisplay::processMessage(const hpop_msgs::msg::SatelliteState::SharedPt
         createOrbitLine(id);
     }
 
-    // Add position to trail (convert from meters, apply scale)
+    // Store RAW position in meters (scale applied at render time)
     Ogre::Vector3 pos(
-        static_cast<float>(msg->position.x * scale_factor_),
-        static_cast<float>(msg->position.y * scale_factor_),
-        static_cast<float>(msg->position.z * scale_factor_)
+        static_cast<float>(msg->position.x),
+        static_cast<float>(msg->position.y),
+        static_cast<float>(msg->position.z)
     );
 
     auto& traj = orbits_[id];
@@ -224,9 +231,15 @@ void OrbitDisplay::updateOrbitLine(OrbitTrajectory& traj)
     traj.line_object->clear();
     traj.line_object->begin("BaseWhiteNoLighting", Ogre::RenderOperation::OT_LINE_STRIP);
 
+    // Apply scale factor at render time (positions stored in meters)
     for (const auto& pos : traj.positions)
     {
-        traj.line_object->position(pos);
+        Ogre::Vector3 scaled_pos(
+            pos.x * scale_factor_,
+            pos.y * scale_factor_,
+            pos.z * scale_factor_
+        );
+        traj.line_object->position(scaled_pos);
         traj.line_object->colour(traj.color);
     }
 
