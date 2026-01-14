@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 1000  # Hz (matches Gazebo physics rate)
+    update_rate: 250  # Hz (matches Gazebo physics rate: 1/0.004s)
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster

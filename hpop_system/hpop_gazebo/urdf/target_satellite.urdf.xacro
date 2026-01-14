@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="target_satellite">
 
-  <!-- Properties -->
-  <xacro:property name="satellite_mass" value="500.0"/>
-  <xacro:property name="satellite_size_x" value="1.5"/>
-  <xacro:property name="satellite_size_y" value="1.0"/>
-  <xacro:property name="satellite_size_z" value="1.0"/>
+  <!-- Properties - 3U CubeSat size (10cm x 10cm x 30cm) scaled for visualization -->
+  <xacro:property name="cubesat_unit" value="0.1"/>  <!-- 10cm = 1U -->
+  <xacro:property name="satellite_mass" value="5.0"/>  <!-- 5kg for 3U CubeSat -->
+  <xacro:property name="satellite_size_x" value="${cubesat_unit}"/>
+  <xacro:property name="satellite_size_y" value="${cubesat_unit}"/>
+  <xacro:property name="satellite_size_z" value="${3*cubesat_unit}"/>  <!-- 3U = 30cm -->
 
   <!-- Materials -->
   <material name="silver">
@@ -20,8 +21,20 @@
   <material name="docking_green">
     <color rgba="0.2 0.8 0.2 1.0"/>
   </material>
+  <material name="target_orange">
+    <color rgba="1.0 0.5 0.0 1.0"/>
+  </material>
 
-  <!-- Base link (satellite body) -->
+  <!-- Dummy root link for KDL (no inertia) -->
+  <link name="target_dummy_root"/>
+
+  <joint name="target_dummy_to_base" type="fixed">
+    <parent link="target_dummy_root"/>
+    <child link="target_base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Base link (satellite body - 3U CubeSat) -->
   <link name="target_base_link">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -47,89 +60,37 @@
     </inertial>
   </link>
 
-  <!-- Solar panel 1 -->
-  <link name="target_solar_panel_1">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="2.0 0.03 1.0"/>
-      </geometry>
-      <material name="solar_blue"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="2.0 0.03 1.0"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="30.0"/>
-      <inertia ixx="5" ixy="0" ixz="0" iyy="15" iyz="0" izz="15"/>
-    </inertial>
-  </link>
-
-  <joint name="target_solar_panel_1_joint" type="fixed">
-    <parent link="target_base_link"/>
-    <child link="target_solar_panel_1"/>
-    <origin xyz="0 1.0 0" rpy="0 0 0"/>
-  </joint>
-
-  <!-- Solar panel 2 -->
-  <link name="target_solar_panel_2">
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="2.0 0.03 1.0"/>
-      </geometry>
-      <material name="solar_blue"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <box size="2.0 0.03 1.0"/>
-      </geometry>
-    </collision>
-    <inertial>
-      <mass value="30.0"/>
-      <inertia ixx="5" ixy="0" ixz="0" iyy="15" iyz="0" izz="15"/>
-    </inertial>
-  </link>
-
-  <joint name="target_solar_panel_2_joint" type="fixed">
-    <parent link="target_base_link"/>
-    <child link="target_solar_panel_2"/>
-    <origin xyz="0 -1.0 0" rpy="0 0 0"/>
-  </joint>
+  <!-- Solar panels removed - disabled debris satellite -->
 
   <!-- =========================================== -->
   <!-- Magnetic Docking Port (Target side) -->
   <!-- =========================================== -->
 
-  <!-- Docking port structure -->
+  <!-- Docking port structure (scaled for 3U CubeSat) -->
   <link name="docking_port">
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.1" length="0.15"/>
+        <cylinder radius="0.015" length="0.02"/>
       </geometry>
       <material name="dark_grey"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.1" length="0.15"/>
+        <cylinder radius="0.015" length="0.02"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="5.0"/>
-      <inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/>
+      <mass value="0.1"/>
+      <inertia ixx="0.00001" ixy="0" ixz="0" iyy="0.00001" iyz="0" izz="0.00001"/>
     </inertial>
   </link>
 
   <joint name="docking_port_joint" type="fixed">
     <parent link="target_base_link"/>
     <child link="docking_port"/>
-    <origin xyz="${satellite_size_x/2 + 0.075} 0 0" rpy="0 ${pi/2} 0"/>
+    <origin xyz="${satellite_size_x/2 + 0.01} 0 0" rpy="0 ${pi/2} 0"/>
   </joint>
 
   <!-- Magnetic contact surface -->
@@ -137,60 +98,60 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.08" length="0.02"/>
+        <cylinder radius="0.012" length="0.005"/>
       </geometry>
       <material name="docking_green"/>
     </visual>
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.08" length="0.02"/>
+        <cylinder radius="0.012" length="0.005"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="0.5"/>
-      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      <mass value="0.02"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
     </inertial>
   </link>
 
   <joint name="magnetic_surface_joint" type="fixed">
     <parent link="docking_port"/>
     <child link="magnetic_contact_surface"/>
-    <origin xyz="0 0 0.085" rpy="0 0 0"/>
+    <origin xyz="0 0 0.012" rpy="0 0 0"/>
   </joint>
 
-  <!-- Antenna -->
-  <link name="antenna">
+  <!-- Antenna (scaled for 3U CubeSat) -->
+  <link name="target_antenna">
     <visual>
-      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <origin xyz="0 0 0.03" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.02" length="0.3"/>
+        <cylinder radius="0.004" length="0.06"/>
       </geometry>
       <material name="dark_grey"/>
     </visual>
     <visual>
-      <origin xyz="0 0 0.35" rpy="0 0 0"/>
+      <origin xyz="0 0 0.07" rpy="0 0 0"/>
       <geometry>
-        <sphere radius="0.05"/>
+        <sphere radius="0.008"/>
       </geometry>
       <material name="silver"/>
     </visual>
     <collision>
-      <origin xyz="0 0 0.2" rpy="0 0 0"/>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
       <geometry>
-        <cylinder radius="0.05" length="0.4"/>
+        <cylinder radius="0.01" length="0.08"/>
       </geometry>
     </collision>
     <inertial>
-      <mass value="2.0"/>
-      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      <mass value="0.02"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0" iyy="0.000001" iyz="0" izz="0.000001"/>
     </inertial>
   </link>
 
-  <joint name="antenna_joint" type="fixed">
+  <joint name="target_antenna_joint" type="fixed">
     <parent link="target_base_link"/>
-    <child link="antenna"/>
-    <origin xyz="-0.3 0 ${satellite_size_z/2}" rpy="0 0 0"/>
+    <child link="target_antenna"/>
+    <origin xyz="-0.02 0 ${satellite_size_z/2}" rpy="0 0 0"/>
   </joint>
 
   <!-- =========================================== -->
@@ -198,19 +159,17 @@
   <!-- =========================================== -->
 
   <gazebo reference="target_base_link">
-    <material>Gazebo/Grey</material>
+    <material>Gazebo/Orange</material>
   </gazebo>
-  <gazebo reference="target_solar_panel_1">
-    <material>Gazebo/Blue</material>
-  </gazebo>
-  <gazebo reference="target_solar_panel_2">
-    <material>Gazebo/Blue</material>
-  </gazebo>
+  <!-- Solar panels removed -->
   <gazebo reference="docking_port">
     <material>Gazebo/DarkGrey</material>
   </gazebo>
   <gazebo reference="magnetic_contact_surface">
     <material>Gazebo/Green</material>
+  </gazebo>
+  <gazebo reference="target_antenna">
+    <material>Gazebo/Grey</material>
   </gazebo>
 
 </robot>

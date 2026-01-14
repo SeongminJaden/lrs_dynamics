@@ -1,0 +1,105 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    # Grid for reference (centered on LVLH frame)
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Cell Size: 10
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Plane: XY
+      Plane Cell Count: 30
+      Reference Frame: lvlh
+      Color: 80; 80; 80
+
+    # TF display
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Frame Timeout: 999999
+      Frames:
+        All Enabled: false
+        lvlh:
+          Value: true
+      Marker Scale: 5.0
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+
+    # LVLH Satellite Markers (Chaser and Target)
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: LVLHSatellites
+      Topic:
+        Value: /lvlh/satellite_markers
+
+    # Distance Text
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: DistanceText
+      Topic:
+        Value: /lvlh/distance_text
+
+    # Relative Motion Path (Target trajectory relative to Chaser)
+    - Class: rviz_default_plugins/Path
+      Enabled: true
+      Name: RelativeMotionPath
+      Topic:
+        Value: /lvlh/relative_path
+      Color: 255; 255; 0
+      Line Style: Lines
+      Pose Style: None
+
+    # Axes indicator
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Name: LVLHAxes
+      Reference Frame: lvlh
+      Length: 20
+      Radius: 0.5
+
+  Enabled: true
+  Global Options:
+    Background Color: 20; 20; 30
+    Fixed Frame: lvlh
+    Frame Rate: 30
+
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 200
+      Enable Stereo Rendering:
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.6
+      Target Frame: lvlh
+      Value: Orbit (rviz_default_plugins)
+      Yaw: 0.785
+
+Window Geometry:
+  Height: 800
+  Width: 1200
+  X: 100
+  Y: 100

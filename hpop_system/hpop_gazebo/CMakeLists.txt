@@ -85,16 +85,102 @@ ament_target_dependencies(arm_capture_controller
   sensor_msgs
 )
 
+# Rendezvous Controller Node
+find_package(rclcpp_action REQUIRED)
+find_package(trajectory_msgs REQUIRED)
+find_package(control_msgs REQUIRED)
+find_package(hpop_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
+
+# MoveIt2 for robot arm control
+find_package(moveit_ros_planning_interface REQUIRED)
+find_package(moveit_msgs REQUIRED)
+
+add_executable(rendezvous_controller src/rendezvous_controller.cpp)
+
+# Base dependencies
+set(RENDEZVOUS_DEPS
+  rclcpp
+  rclcpp_action
+  std_msgs
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+  trajectory_msgs
+  control_msgs
+  gazebo_msgs
+  hpop_msgs
+  tf2
+  tf2_ros
+  tf2_geometry_msgs
+  visualization_msgs
+)
+
+# Add MoveIt2 if available
+if(moveit_ros_planning_interface_FOUND AND moveit_msgs_FOUND)
+  message(STATUS "MoveIt2 found - enabling MoveGroup interface")
+  target_compile_definitions(rendezvous_controller PRIVATE MOVEIT2_AVAILABLE)
+  list(APPEND RENDEZVOUS_DEPS moveit_ros_planning_interface moveit_msgs)
+else()
+  message(STATUS "MoveIt2 not found - using trajectory controller only")
+endif()
+
+ament_target_dependencies(rendezvous_controller ${RENDEZVOUS_DEPS})
+
+# ==================== RViz2 Mission Control Panel ====================
+find_package(rviz_common REQUIRED)
+find_package(rviz_rendering REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(ament_index_cpp REQUIRED)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
+# MOC the header file
+qt5_wrap_cpp(MOC_FILES include/hpop_gazebo/mission_control_panel.hpp)
+
+add_library(mission_control_panel SHARED
+  src/rviz_panel/mission_control_panel.cpp
+  ${MOC_FILES}
+)
+target_include_directories(mission_control_panel PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(mission_control_panel
+  Qt5::Widgets
+)
+ament_target_dependencies(mission_control_panel
+  rclcpp
+  rviz_common
+  rviz_rendering
+  pluginlib
+  std_msgs
+  std_srvs
+  ament_index_cpp
+)
+
+pluginlib_export_plugin_description_file(rviz_common plugins.xml)
+
 # Install targets
 install(TARGETS
   gazebo_hpop_bridge_node
   arm_capture_controller
+  rendezvous_controller
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(TARGETS
   magnetic_docking_plugin
+  mission_control_panel
   LIBRARY DESTINATION lib
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 # Install launch files

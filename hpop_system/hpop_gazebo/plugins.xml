@@ -1,0 +1,10 @@
+<library path="mission_control_panel">
+  <class name="hpop_gazebo/MissionControlPanel"
+         type="hpop_gazebo::MissionControlPanel"
+         base_class_type="rviz_common::Panel">
+    <description>
+      Mission Control Panel for Satellite Rendezvous and Docking.
+      Controls HPOP orbit propagation, rendezvous sequence, and robot arm capture.
+    </description>
+  </class>
+</library>

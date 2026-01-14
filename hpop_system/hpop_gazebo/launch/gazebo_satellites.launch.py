@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """
-Launch file for satellite capture simulation with OpenMANIPULATOR-P
-Includes: Gazebo, Robot Arm Control, Rendezvous Controller, Target Satellite
+Launch file for Gazebo simulation only
+- Gazebo world
+- Spawn Chaser satellite
+- Spawn Target satellite
+
+Run hpop_mission.launch.py after this is fully loaded
 """
 
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction, GroupAction
 from launch.conditions import IfCondition
 from launch.substitutions import LaunchConfiguration, Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 
 
 def generate_launch_description():
@@ -26,10 +30,6 @@ def generate_launch_description():
         default=os.path.join(pkg_hpop_gazebo, 'worlds', 'satellite_capture.world'))
     gui = LaunchConfiguration('gui', default='true')
     paused = LaunchConfiguration('paused', default='false')
-    rviz = LaunchConfiguration('rviz', default='true')
-
-    # RViz config file
-    rviz_config = os.path.join(pkg_hpop_gazebo, 'config', 'satellite_capture.rviz')
 
     # Process xacro for chaser satellite
     chaser_xacro_file = os.path.join(pkg_hpop_gazebo, 'urdf', 'chaser_satellite.urdf.xacro')
@@ -58,20 +58,62 @@ def generate_launch_description():
         condition=IfCondition(gui)
     )
 
-    # Chaser Robot state publisher
+    # Chaser Robot state publisher (publishes to default /robot_description for gazebo_ros2_control)
     chaser_robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        name='chaser_robot_state_publisher',
+        name='robot_state_publisher',
         output='screen',
         parameters=[{
             'robot_description': chaser_robot_description,
             'use_sim_time': use_sim_time,
             'frame_prefix': ''
-        }],
-        remappings=[
-            ('/robot_description', '/chaser/robot_description')
-        ]
+        }]
+    )
+
+    # TF Structure for space simulation:
+    # world (ECI inertial frame)
+    #   └── earth (Earth center)
+    #         ├── chaser/dummy_root -> base_link -> arm...
+    #         └── target/target_dummy_root -> target_base_link...
+
+    # Static transform: world -> earth (Earth at center of inertial frame)
+    world_to_earth_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_to_earth_tf',
+        arguments=['0', '0', '0', '0', '0', '0', 'world', 'earth']
+    )
+
+    # =============================================
+    # Floating Origin System (Chaser-centered)
+    # =============================================
+    # Real orbit parameters:
+    #   ISS altitude: ~420km, Earth radius: 6371km
+    #   Orbit radius: 6791km = 6,791,000m
+    #   Chaser-Target separation: 1500km
+    #
+    # Gazebo uses Floating Origin:
+    #   - Chaser at origin (0,0,0)
+    #   - Target at relative position (~165km ahead)
+    #   - This avoids float precision issues
+    #
+    # TF publishes real ECI coordinates for RViz visualization
+
+    # Chaser position - at origin for Gazebo floating origin
+    earth_to_chaser_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='earth_to_chaser_tf',
+        arguments=['--x', '0', '--y', '0', '--z', '0', '--roll', '0', '--pitch', '0', '--yaw', '0', '--frame-id', 'earth', '--child-frame-id', 'dummy_root']
+    )
+
+    # Target position - 2m ahead matching Gazebo spawn
+    earth_to_target_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='earth_to_target_tf',
+        arguments=['--x', '2', '--y', '0', '--z', '0', '--roll', '0', '--pitch', '0', '--yaw', '0', '--frame-id', 'earth', '--child-frame-id', 'target/target_dummy_root']
     )
 
     # Target Robot state publisher
@@ -88,21 +130,30 @@ def generate_launch_description():
         }]
     )
 
-    # Spawn chaser satellite
+    # =============================================
+    # Gazebo Floating Origin (Chaser at origin)
+    # =============================================
+    # For physics simulation, use small coordinates to avoid precision issues
+    # Chaser at origin, Target at relative position for docking simulation
+    #
+    # Real distance: 1500km, but for docking sim we start closer
+    # Initial separation: 2m (for robot arm reach testing)
+
+    # Spawn chaser satellite at origin
     spawn_chaser = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         name='spawn_chaser_satellite',
         arguments=[
             '-entity', 'chaser_satellite',
-            '-topic', '/chaser/robot_description',
+            '-topic', '/robot_description',
             '-x', '0', '-y', '0', '-z', '0',
             '-R', '0', '-P', '0', '-Y', '0'
         ],
         output='screen'
     )
 
-    # Spawn target satellite
+    # Spawn target satellite 2m ahead of chaser (for docking simulation)
     spawn_target = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
@@ -110,96 +161,27 @@ def generate_launch_description():
         arguments=[
             '-entity', 'target_satellite',
             '-topic', '/target/robot_description',
-            '-x', '1.5', '-y', '0', '-z', '0',
+            '-x', '2.0', '-y', '0', '-z', '0',
             '-R', '0', '-P', '0', '-Y', '0'
         ],
         output='screen'
     )
 
-    # Joint state broadcaster (spawned after entity is spawned)
-    joint_state_broadcaster_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['joint_state_broadcaster', '-c', '/controller_manager'],
-        output='screen',
-    )
-
-    # Arm trajectory controller (spawned after joint_state_broadcaster)
-    arm_controller_spawner = Node(
-        package='controller_manager',
-        executable='spawner',
-        arguments=['arm_controller', '-c', '/controller_manager'],
-        output='screen',
-    )
-
-    # Rendezvous Controller Node
-    rendezvous_controller = Node(
-        package='hpop_gazebo',
-        executable='rendezvous_controller',
-        name='rendezvous_controller',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'approach_distance': 0.5,
-            'capture_distance': 0.35,
-            'approach_velocity': 0.1
-        }]
-    )
-
-    # RViz2 Node
-    rviz2_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config],
-        parameters=[{'use_sim_time': use_sim_time}],
-        output='screen',
-        condition=IfCondition(rviz)
-    )
-
-    # HPOP Orbit Demo Node (simulates TARGET and CHASER satellites)
-    # Note: Propagation is controlled via services:
-    #   - ros2 service call /hpop/start_propagation std_srvs/srv/Trigger
-    #   - ros2 service call /hpop/stop_propagation std_srvs/srv/Trigger
-    #   - ros2 service call /hpop/reset_propagation std_srvs/srv/Trigger
-    orbit_demo_node = Node(
-        package='hpop_core',
-        executable='orbit_demo_node',
-        name='orbit_demo_node',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time}]
-    )
-
-    # Spawn controllers after entity is spawned
-    delayed_controller_spawner = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=spawn_chaser,
-            on_exit=[joint_state_broadcaster_spawner],
-        )
-    )
-
-    # Spawn arm controller after joint_state_broadcaster
-    delayed_arm_controller = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[arm_controller_spawner],
-        )
-    )
-
-    # Start rendezvous controller after arm controller is ready
-    delayed_rendezvous = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=arm_controller_spawner,
-            on_exit=[rendezvous_controller],
-        )
+    # Group spawn actions with a delay to ensure Gazebo is ready
+    delayed_spawn = TimerAction(
+        period=2.0,  # Wait for Gazebo to fully initialize
+        actions=[
+            GroupAction([
+                spawn_chaser,
+                spawn_target,
+            ])
+        ]
     )
 
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('gui', default_value='true'),
         DeclareLaunchArgument('paused', default_value='false'),
-        DeclareLaunchArgument('rviz', default_value='true',
-            description='Launch RViz2 visualization'),
         DeclareLaunchArgument('world',
             default_value=os.path.join(pkg_hpop_gazebo, 'worlds', 'satellite_capture.world')),
 
@@ -207,11 +189,9 @@ def generate_launch_description():
         gazebo_client,
         chaser_robot_state_publisher,
         target_robot_state_publisher,
-        spawn_chaser,
-        spawn_target,
-        rviz2_node,
-        orbit_demo_node,
-        delayed_controller_spawner,
-        delayed_arm_controller,
-        delayed_rendezvous,
+        # TF hierarchy: world -> earth -> satellites
+        world_to_earth_tf,
+        earth_to_chaser_tf,
+        earth_to_target_tf,
+        delayed_spawn,
     ])

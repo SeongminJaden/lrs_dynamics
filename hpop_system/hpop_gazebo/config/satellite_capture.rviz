@@ -1,0 +1,139 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    # Grid for reference
+    - Class: rviz_default_plugins/Grid
+      Enabled: true
+      Name: Grid
+      Cell Size: 1
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Color: 160; 160; 164
+
+    # TF display to verify frames
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Name: TF
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+      Marker Scale: 0.5
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+
+    # Robot Model for chaser
+    - Class: rviz_default_plugins/RobotModel
+      Enabled: true
+      Name: ChaserRobot
+      Description Topic:
+        Value: /robot_description
+      Visual Enabled: true
+
+    # Chaser Orbit Path (green) - disabled, uses large coordinates
+    - Class: rviz_default_plugins/Path
+      Color: 0; 255; 0
+      Enabled: false
+      Name: ChaserOrbit
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /hpop/chaser_orbit_path
+      Line Style: Billboards
+      Line Width: 100000
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Style: None
+      Buffer Length: 1
+
+    # Target Orbit Path (orange) - disabled, uses large coordinates
+    - Class: rviz_default_plugins/Path
+      Color: 255; 165; 0
+      Enabled: false
+      Name: TargetOrbit
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /hpop/target_orbit_path
+      Line Style: Billboards
+      Line Width: 100000
+      Buffer Length: 1
+
+    # Satellite position markers
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: SatelliteMarkers
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /hpop/satellite_markers
+
+    # Earth sphere (blue, at origin)
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Earth
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /earth_marker
+
+  Enabled: true
+  Global Options:
+    Background Color: 0; 0; 0
+    Fixed Frame: world
+    Frame Rate: 30
+
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 10
+      Enable Stereo Rendering:
+        Value: false
+      Focal Point:
+        X: 1
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.785
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz_default_plugins)
+      Yaw: 0.785
+
+Window Geometry:
+  Height: 900
+  Width: 1400
+  X: 50
+  Y: 50

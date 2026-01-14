@@ -21,6 +21,10 @@
   <depend>hpop_core</depend>
   <depend>hpop_perturbations</depend>
   <depend>gazebo_ros</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>rclcpp_action</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>control_msgs</depend>
 
   <build_depend>gazebo_dev</build_depend>
   <exec_depend>gazebo_ros_pkgs</exec_depend>

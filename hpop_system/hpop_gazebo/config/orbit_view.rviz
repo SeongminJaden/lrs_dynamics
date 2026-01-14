@@ -1,0 +1,97 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    # Earth sphere (blue, at origin)
+    - Class: rviz_default_plugins/Marker
+      Enabled: true
+      Name: Earth
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /visualization/earth_marker
+
+    # Chaser Orbit Path (green)
+    - Class: rviz_default_plugins/Path
+      Color: 0; 255; 0
+      Enabled: true
+      Name: ChaserOrbit
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /visualization/chaser_orbit
+      Line Style: Billboards
+      Line Width: 0.05
+      Pose Style: None
+      Buffer Length: 1
+
+    # Target Orbit Path (orange)
+    - Class: rviz_default_plugins/Path
+      Color: 255; 165; 0
+      Enabled: true
+      Name: TargetOrbit
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /visualization/target_orbit
+      Line Style: Billboards
+      Line Width: 0.05
+      Buffer Length: 1
+
+    # Satellite position markers
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: SatelliteMarkers
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /visualization/satellite_markers
+
+  Enabled: true
+  Global Options:
+    Background Color: 0; 0; 0
+    Fixed Frame: orbit_view
+    Frame Rate: 30
+
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 20
+      Enable Stereo Rendering:
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.1
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.1
+      Pitch: 0.785
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz_default_plugins)
+      Yaw: 0.785
+
+Window Geometry:
+  Height: 600
+  Width: 800
+  X: 1300
+  Y: 100
