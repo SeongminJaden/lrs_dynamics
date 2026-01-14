@@ -1,0 +1,27 @@
+<library path="hpop_panel">
+  <class name="hpop_rviz_plugins/HpopPanel"
+         type="hpop_rviz_plugins::HpopPanel"
+         base_class_type="rviz_common::Panel">
+    <description>
+      HPOP Control Panel - Satellite management, propagation control, and analysis
+    </description>
+  </class>
+</library>
+
+<library path="hpop_displays">
+  <class name="hpop_rviz_plugins/OrbitDisplay"
+         type="hpop_rviz_plugins::OrbitDisplay"
+         base_class_type="rviz_common::Display">
+    <description>
+      Displays satellite orbits and trajectories in 3D
+    </description>
+  </class>
+
+  <class name="hpop_rviz_plugins/EarthDisplay"
+         type="hpop_rviz_plugins::EarthDisplay"
+         base_class_type="rviz_common::Display">
+    <description>
+      Displays 3D Earth with day/night texture
+    </description>
+  </class>
+</library>

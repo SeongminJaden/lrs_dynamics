@@ -1,0 +1,43 @@
+# HPOP Satellite Configuration
+# Default satellites loaded at startup
+
+satellites:
+  - norad_id: 25544
+    name: "ISS (ZARYA)"
+    mass: 420000.0
+    cross_section: 1500.0
+    drag_coefficient: 2.2
+    reflectivity_coefficient: 1.3
+    enabled: true
+
+  - norad_id: 48274
+    name: "STARLINK-2408"
+    mass: 260.0
+    cross_section: 22.0
+    drag_coefficient: 2.2
+    reflectivity_coefficient: 1.5
+    enabled: true
+
+  - norad_id: 46984
+    name: "SENTINEL-6A"
+    mass: 1192.0
+    cross_section: 18.0
+    drag_coefficient: 2.2
+    reflectivity_coefficient: 1.4
+    enabled: true
+
+  - norad_id: 43013
+    name: "KOMPSAT-7"
+    mass: 500.0
+    cross_section: 10.0
+    drag_coefficient: 2.2
+    reflectivity_coefficient: 1.3
+    enabled: false
+
+  - norad_id: 39084
+    name: "LANDSAT 8"
+    mass: 2071.0
+    cross_section: 25.0
+    drag_coefficient: 2.2
+    reflectivity_coefficient: 1.4
+    enabled: false

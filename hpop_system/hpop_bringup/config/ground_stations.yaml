@@ -1,0 +1,67 @@
+# HPOP Ground Station Configuration
+# Ground stations for contact prediction
+
+ground_stations:
+  - id: "DAEJEON"
+    name: "Korea Aerospace Research Institute"
+    latitude: 36.35
+    longitude: 127.38
+    altitude: 100.0
+    min_elevation: 5.0
+    enabled: true
+
+  - id: "SVALBARD"
+    name: "Svalbard Satellite Station"
+    latitude: 78.23
+    longitude: 15.39
+    altitude: 450.0
+    min_elevation: 3.0
+    enabled: true
+
+  - id: "CANBERRA"
+    name: "Canberra Deep Space Communication"
+    latitude: -35.28
+    longitude: 149.13
+    altitude: 600.0
+    min_elevation: 5.0
+    enabled: true
+
+  - id: "GOLDSTONE"
+    name: "Goldstone Deep Space Complex"
+    latitude: 35.43
+    longitude: -116.89
+    altitude: 1000.0
+    min_elevation: 5.0
+    enabled: true
+
+  - id: "MADRID"
+    name: "Madrid Deep Space Communication"
+    latitude: 40.43
+    longitude: -4.25
+    altitude: 750.0
+    min_elevation: 5.0
+    enabled: true
+
+  - id: "TROMSO"
+    name: "Tromsø Satellite Station"
+    latitude: 69.66
+    longitude: 18.94
+    altitude: 130.0
+    min_elevation: 5.0
+    enabled: true
+
+  - id: "MCMURDO"
+    name: "McMurdo Station"
+    latitude: -77.85
+    longitude: 166.67
+    altitude: 10.0
+    min_elevation: 5.0
+    enabled: false
+
+  - id: "USUDA"
+    name: "JAXA Usuda Deep Space Center"
+    latitude: 36.13
+    longitude: 138.36
+    altitude: 1456.0
+    min_elevation: 5.0
+    enabled: false

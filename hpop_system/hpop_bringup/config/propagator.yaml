@@ -1,0 +1,44 @@
+# HPOP Propagator Configuration
+
+propagator:
+  ros__parameters:
+    # Integrator settings
+    integrator_type: "RKF78"  # Options: RK4, RKF45, RKF78, ABM
+    step_size: 60.0           # Integration step size [seconds]
+    output_rate: 10.0         # State publication rate [Hz]
+
+    # Gravity model settings
+    gravity_degree: 70        # Spherical harmonic degree (max 360)
+    gravity_order: 70         # Spherical harmonic order (max 360)
+    gravity_model_file: ""    # Empty = use default GGM05C
+
+    # Perturbation model enables
+    perturbations:
+      gravity: true
+      drag: true
+      srp: true               # Solar Radiation Pressure
+      third_body_sun: true
+      third_body_moon: true
+      solid_tides: false
+      ocean_tides: false
+      relativity: false
+
+    # Atmospheric drag settings
+    drag:
+      model: "exponential"    # Options: exponential, nrlmsise00
+      f107_average: 150.0     # Average solar flux
+      f107_daily: 150.0       # Daily solar flux
+      ap_index: 15.0          # Geomagnetic index
+
+    # Solar radiation pressure settings
+    srp:
+      shadow_model: "cylindrical"  # Options: cylindrical, conical
+      solar_flux: 1367.0      # Solar constant [W/m^2]
+
+    # Coordinate frame settings
+    frames:
+      reference_frame: "ECI"  # Options: ECI, ECEF
+      output_frames:
+        - "ECI"
+        - "ECEF"
+        - "Keplerian"
