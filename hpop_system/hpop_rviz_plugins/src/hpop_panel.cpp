@@ -134,15 +134,19 @@ void HpopPanel::setupRosConnections()
                                             msg->velocity.y * msg->velocity.y +
                                             msg->velocity.z * msg->velocity.z) / 1000.0;
 
-            // Calculate orbital period from semi-major axis
-            double sma = msg->elements.semi_major_axis;
-            double mu = 3.986004418e14;  // Earth GM
-            double period_min = (sma > 0) ?
-                                2.0 * M_PI * std::sqrt(sma * sma * sma / mu) / 60.0 : 0.0;
+            // Get orbital period from message or calculate from semi-major axis
+            double period_min = msg->elements.period / 60.0;
+            if (period_min <= 0.0) {
+                double sma = msg->elements.semi_major_axis;
+                double mu = 3.986004418e14;  // Earth GM
+                period_min = (sma > 0) ?
+                             2.0 * M_PI * std::sqrt(sma * sma * sma / mu) / 60.0 : 0.0;
+            }
 
-            // Update satellite in table
+            // Update satellite in table (use name if available, otherwise satellite_id)
+            std::string sat_name = msg->name.empty() ? msg->satellite_id : msg->name;
             satellite_table_->updateSatellite(
-                msg->satellite_id,
+                sat_name,
                 altitude_km,
                 velocity_kms,
                 period_min

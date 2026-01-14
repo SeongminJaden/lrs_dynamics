@@ -42,10 +42,12 @@ include_directories(
 )
 
 # HPOP Panel plugin library
+# Note: Header files with Q_OBJECT must be listed for AUTOMOC
 add_library(hpop_panel SHARED
   src/hpop_panel.cpp
   src/satellite_table_widget.cpp
   src/propagation_control_widget.cpp
+  include/hpop_rviz_plugins/hpop_panel.hpp
 )
 
 target_include_directories(hpop_panel PUBLIC
@@ -71,9 +73,12 @@ ament_target_dependencies(hpop_panel
 )
 
 # Orbit Display plugin library
+# Note: Header files with Q_OBJECT must be listed for AUTOMOC
 add_library(hpop_displays SHARED
   src/orbit_display.cpp
   src/earth_display.cpp
+  include/hpop_rviz_plugins/orbit_display.hpp
+  include/hpop_rviz_plugins/earth_display.hpp
 )
 
 target_include_directories(hpop_displays PUBLIC

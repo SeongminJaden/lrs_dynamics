@@ -1,0 +1,172 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <world name="orbital_environment">
+
+    <!-- Physics configuration -->
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+      <gravity>0 0 0</gravity>  <!-- Disabled - using GGM05C plugin -->
+    </physics>
+
+    <!-- GGM05C High-Precision Gravity Plugin -->
+    <plugin name="leo_gravity_plugin" filename="libleo_gravity_world_plugin.so">
+      <nmax>70</nmax>
+      <update_rate>1000</update_rate>
+      <threads>4</threads>
+      <ggm_file>/home/seongmin/ros2_ws/src/lrs_dynamics/data/GGM05C.gfc</ggm_file>
+    </plugin>
+
+    <!-- Ambient light for visibility -->
+    <scene>
+      <ambient>0.2 0.2 0.2 1.0</ambient>
+      <background>0.0 0.0 0.05 1.0</background>
+    </scene>
+
+    <!-- Sun light source -->
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>1.5e11 0 0 0 0 0</pose>
+      <diffuse>1.0 1.0 0.9 1</diffuse>
+      <specular>0.5 0.5 0.5 1</specular>
+      <direction>-1 0 0</direction>
+    </light>
+
+    <!-- Earth reference (visual only, no collision) -->
+    <model name="earth_reference">
+      <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
+      <link name="earth_link">
+        <visual name="earth_visual">
+          <geometry>
+            <sphere>
+              <radius>6378137</radius>
+            </sphere>
+          </geometry>
+          <material>
+            <ambient>0.1 0.3 0.6 1</ambient>
+            <diffuse>0.1 0.3 0.6 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ISS-like satellite at 400km altitude -->
+    <model name="satellite_iss">
+      <pose>6778137 0 0 0 0 0</pose>  <!-- 400km above equator -->
+      <link name="body">
+        <inertial>
+          <mass>420000</mass>
+          <inertia>
+            <ixx>100000</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>100000</iyy>
+            <iyz>0</iyz>
+            <izz>100000</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>100 80 20</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>100 80 20</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+          </material>
+        </visual>
+        <!-- Initial orbital velocity for circular orbit at 400km -->
+        <!-- v = sqrt(GM/r) = sqrt(3.986e14 / 6.778e6) = 7669 m/s -->
+        <velocity>0 7669 0</velocity>
+      </link>
+    </model>
+
+    <!-- LEO satellite at 550km altitude (Starlink-like) -->
+    <model name="satellite_starlink">
+      <pose>5995840 3464102 0 0 0 0</pose>  <!-- 550km, 30 degrees -->
+      <link name="body">
+        <inertial>
+          <mass>260</mass>
+          <inertia>
+            <ixx>50</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>50</iyy>
+            <iyz>0</iyz>
+            <izz>50</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3 2 0.3</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3 2 0.3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.3 1</ambient>
+            <diffuse>0.3 0.3 0.3 1</diffuse>
+          </material>
+        </visual>
+        <!-- Orbital velocity at 550km: v = sqrt(GM/r) ≈ 7585 m/s -->
+        <!-- Decompose for 30 degree position angle -->
+        <velocity>-3792 6567 0</velocity>
+      </link>
+    </model>
+
+    <!-- MEO satellite at 20200km (GPS-like) -->
+    <model name="satellite_gps">
+      <pose>0 0 26560000 0 0 0</pose>  <!-- 20200km altitude, polar -->
+      <link name="body">
+        <inertial>
+          <mass>2000</mass>
+          <inertia>
+            <ixx>500</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>500</iyy>
+            <iyz>0</iyz>
+            <izz>500</izz>
+          </inertia>
+        </inertial>
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5 3 3</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5 3 3</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.6 0.5 0.1 1</ambient>
+            <diffuse>0.6 0.5 0.1 1</diffuse>
+          </material>
+        </visual>
+        <!-- Orbital velocity at 26560km: v = sqrt(GM/r) ≈ 3874 m/s -->
+        <velocity>3874 0 0</velocity>
+      </link>
+    </model>
+
+  </world>
+</sdf>

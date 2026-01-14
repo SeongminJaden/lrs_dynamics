@@ -57,6 +57,16 @@ ament_target_dependencies(orbit_propagator_node
   hpop_msgs
 )
 
+# ROS2 Node: Orbit Demo (for visualization testing)
+add_executable(orbit_demo_node src/nodes/orbit_demo_node.cpp)
+target_include_directories(orbit_demo_node PRIVATE include)
+ament_target_dependencies(orbit_demo_node
+  rclcpp
+  std_msgs
+  geometry_msgs
+  hpop_msgs
+)
+
 # Install headers
 install(DIRECTORY include/
   DESTINATION include
@@ -71,7 +81,7 @@ install(TARGETS ${PROJECT_NAME}
   INCLUDES DESTINATION include
 )
 
-install(TARGETS test_propagator test_full_propagation orbit_propagator_node
+install(TARGETS test_propagator test_full_propagation orbit_propagator_node orbit_demo_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
