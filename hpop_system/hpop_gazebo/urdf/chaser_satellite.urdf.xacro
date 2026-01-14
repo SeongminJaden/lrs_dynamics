@@ -21,6 +21,15 @@
     <color rgba="0.8 0.2 0.2 1.0"/>
   </material>
 
+  <!-- Dummy root link (fixes KDL warning about inertia on root link) -->
+  <link name="world"/>
+
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
   <!-- Base link (satellite body) -->
   <link name="base_link">
     <visual>

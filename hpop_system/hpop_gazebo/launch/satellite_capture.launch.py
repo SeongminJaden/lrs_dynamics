@@ -6,13 +6,12 @@ Launch file for satellite capture simulation with OpenMANIPULATOR-P
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, RegisterEventHandler, TimerAction
 from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, Command
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.event_handlers import OnProcessExit
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
-import xacro
 
 
 def generate_launch_description():
@@ -76,7 +75,7 @@ def generate_launch_description():
         output='screen'
     )
 
-    # Joint state broadcaster
+    # Joint state broadcaster (spawned after entity is spawned)
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
@@ -84,7 +83,7 @@ def generate_launch_description():
         output='screen',
     )
 
-    # Arm trajectory controller
+    # Arm trajectory controller (spawned after joint_state_broadcaster)
     arm_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
@@ -92,21 +91,22 @@ def generate_launch_description():
         output='screen',
     )
 
-    # Static TF for world to base_link (for visualization)
-    static_tf = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='world_to_base',
-        arguments=['0', '0', '0', '0', '0', '0', 'world', 'base_link']
+    # Note: static_transform_publisher removed - world link is now in URDF
+
+    # Spawn controllers after entity is spawned
+    delayed_controller_spawner = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=spawn_chaser,
+            on_exit=[joint_state_broadcaster_spawner],
+        )
     )
 
-    # Capture status monitor (optional)
-    capture_monitor = Node(
-        package='hpop_gazebo',
-        executable='gazebo_hpop_bridge_node',
-        name='capture_bridge',
-        parameters=[{'use_sim_time': use_sim_time}],
-        output='screen'
+    # Spawn arm controller after joint_state_broadcaster
+    delayed_arm_controller = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=joint_state_broadcaster_spawner,
+            on_exit=[arm_controller_spawner],
+        )
     )
 
     return LaunchDescription([
@@ -120,8 +120,6 @@ def generate_launch_description():
         gazebo_client,
         robot_state_publisher,
         spawn_chaser,
-        static_tf,
-        # Note: Controllers require ros2_control to be properly set up
-        # joint_state_broadcaster_spawner,
-        # arm_controller_spawner,
+        delayed_controller_spawner,
+        delayed_arm_controller,
     ])
