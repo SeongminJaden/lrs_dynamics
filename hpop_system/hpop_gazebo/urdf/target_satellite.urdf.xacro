@@ -1,0 +1,216 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="target_satellite">
+
+  <!-- Properties -->
+  <xacro:property name="satellite_mass" value="500.0"/>
+  <xacro:property name="satellite_size_x" value="1.5"/>
+  <xacro:property name="satellite_size_y" value="1.0"/>
+  <xacro:property name="satellite_size_z" value="1.0"/>
+
+  <!-- Materials -->
+  <material name="silver">
+    <color rgba="0.7 0.7 0.7 1.0"/>
+  </material>
+  <material name="dark_grey">
+    <color rgba="0.3 0.3 0.3 1.0"/>
+  </material>
+  <material name="solar_blue">
+    <color rgba="0.1 0.2 0.5 1.0"/>
+  </material>
+  <material name="docking_green">
+    <color rgba="0.2 0.8 0.2 1.0"/>
+  </material>
+
+  <!-- Base link (satellite body) -->
+  <link name="target_base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${satellite_size_x} ${satellite_size_y} ${satellite_size_z}"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${satellite_size_x} ${satellite_size_y} ${satellite_size_z}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${satellite_mass}"/>
+      <inertia ixx="${satellite_mass*(satellite_size_y*satellite_size_y+satellite_size_z*satellite_size_z)/12}"
+               ixy="0" ixz="0"
+               iyy="${satellite_mass*(satellite_size_x*satellite_size_x+satellite_size_z*satellite_size_z)/12}"
+               iyz="0"
+               izz="${satellite_mass*(satellite_size_x*satellite_size_x+satellite_size_y*satellite_size_y)/12}"/>
+    </inertial>
+  </link>
+
+  <!-- Solar panel 1 -->
+  <link name="target_solar_panel_1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="2.0 0.03 1.0"/>
+      </geometry>
+      <material name="solar_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="2.0 0.03 1.0"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="30.0"/>
+      <inertia ixx="5" ixy="0" ixz="0" iyy="15" iyz="0" izz="15"/>
+    </inertial>
+  </link>
+
+  <joint name="target_solar_panel_1_joint" type="fixed">
+    <parent link="target_base_link"/>
+    <child link="target_solar_panel_1"/>
+    <origin xyz="0 1.0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Solar panel 2 -->
+  <link name="target_solar_panel_2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="2.0 0.03 1.0"/>
+      </geometry>
+      <material name="solar_blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="2.0 0.03 1.0"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="30.0"/>
+      <inertia ixx="5" ixy="0" ixz="0" iyy="15" iyz="0" izz="15"/>
+    </inertial>
+  </link>
+
+  <joint name="target_solar_panel_2_joint" type="fixed">
+    <parent link="target_base_link"/>
+    <child link="target_solar_panel_2"/>
+    <origin xyz="0 -1.0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- =========================================== -->
+  <!-- Magnetic Docking Port (Target side) -->
+  <!-- =========================================== -->
+
+  <!-- Docking port structure -->
+  <link name="docking_port">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.15"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.1" length="0.15"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="5.0"/>
+      <inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+  <joint name="docking_port_joint" type="fixed">
+    <parent link="target_base_link"/>
+    <child link="docking_port"/>
+    <origin xyz="${satellite_size_x/2 + 0.075} 0 0" rpy="0 ${pi/2} 0"/>
+  </joint>
+
+  <!-- Magnetic contact surface -->
+  <link name="magnetic_contact_surface">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.08" length="0.02"/>
+      </geometry>
+      <material name="docking_green"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.08" length="0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="magnetic_surface_joint" type="fixed">
+    <parent link="docking_port"/>
+    <child link="magnetic_contact_surface"/>
+    <origin xyz="0 0 0.085" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Antenna -->
+  <link name="antenna">
+    <visual>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.02" length="0.3"/>
+      </geometry>
+      <material name="dark_grey"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0.35" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.2" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.05" length="0.4"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+    </inertial>
+  </link>
+
+  <joint name="antenna_joint" type="fixed">
+    <parent link="target_base_link"/>
+    <child link="antenna"/>
+    <origin xyz="-0.3 0 ${satellite_size_z/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- =========================================== -->
+  <!-- Gazebo Properties -->
+  <!-- =========================================== -->
+
+  <gazebo reference="target_base_link">
+    <material>Gazebo/Grey</material>
+  </gazebo>
+  <gazebo reference="target_solar_panel_1">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="target_solar_panel_2">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+  <gazebo reference="docking_port">
+    <material>Gazebo/DarkGrey</material>
+  </gazebo>
+  <gazebo reference="magnetic_contact_surface">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+</robot>

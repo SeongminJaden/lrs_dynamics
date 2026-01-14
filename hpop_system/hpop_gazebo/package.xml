@@ -11,15 +11,18 @@
 
   <depend>rclcpp</depend>
   <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
   <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>hpop_msgs</depend>
   <depend>hpop_core</depend>
   <depend>hpop_perturbations</depend>
+  <depend>gazebo_ros</depend>
 
-  <exec_depend>gazebo_ros</exec_depend>
+  <build_depend>gazebo_dev</build_depend>
   <exec_depend>gazebo_ros_pkgs</exec_depend>
   <exec_depend>xacro</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>

@@ -14,6 +14,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -23,16 +24,19 @@ find_package(hpop_core REQUIRED)
 find_package(hpop_perturbations REQUIRED)
 find_package(gazebo_msgs REQUIRED)
 
-# Try to find Gazebo
-find_package(gazebo QUIET)
-find_package(gazebo_ros QUIET)
+# Find Gazebo
+find_package(gazebo REQUIRED)
+find_package(gazebo_ros REQUIRED)
 
 # Include directories
 include_directories(
   include
   ${hpop_core_INCLUDE_DIRS}
   ${hpop_perturbations_INCLUDE_DIRS}
+  ${GAZEBO_INCLUDE_DIRS}
 )
+
+link_directories(${GAZEBO_LIBRARY_DIRS})
 
 # Gazebo HPOP Bridge Node (publishes state, subscribes to gravity)
 add_executable(gazebo_hpop_bridge_node src/gazebo_hpop_bridge_node.cpp)
@@ -52,10 +56,45 @@ ament_target_dependencies(gazebo_hpop_bridge_node
   gazebo_msgs
 )
 
+# Magnetic Docking Gazebo Plugin
+add_library(magnetic_docking_plugin SHARED
+  src/magnetic_docking_plugin.cpp
+)
+target_include_directories(magnetic_docking_plugin PRIVATE
+  ${GAZEBO_INCLUDE_DIRS}
+)
+target_link_libraries(magnetic_docking_plugin
+  ${GAZEBO_LIBRARIES}
+)
+ament_target_dependencies(magnetic_docking_plugin
+  rclcpp
+  std_msgs
+  std_srvs
+  geometry_msgs
+  gazebo_ros
+)
+
+# Arm Capture Controller Node
+find_package(sensor_msgs REQUIRED)
+add_executable(arm_capture_controller src/arm_capture_controller.cpp)
+ament_target_dependencies(arm_capture_controller
+  rclcpp
+  std_msgs
+  std_srvs
+  geometry_msgs
+  sensor_msgs
+)
+
 # Install targets
 install(TARGETS
   gazebo_hpop_bridge_node
+  arm_capture_controller
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS
+  magnetic_docking_plugin
+  LIBRARY DESTINATION lib
 )
 
 # Install launch files
@@ -76,6 +115,11 @@ install(DIRECTORY worlds/
 # Install URDF files
 install(DIRECTORY urdf/
   DESTINATION share/${PROJECT_NAME}/urdf
+)
+
+# Install mesh files
+install(DIRECTORY meshes/
+  DESTINATION share/${PROJECT_NAME}/meshes
 )
 
 ament_package()
