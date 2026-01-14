@@ -53,8 +53,16 @@ target_link_libraries(test_ggm
 )
 ament_target_dependencies(test_ggm ignition-math6)
 
+# GGM05C sample data extractor
+add_executable(extract_ggm_sample test/extract_ggm_sample.cpp src/ggm_model.cpp)
+target_link_libraries(extract_ggm_sample
+  ${GAZEBO_LIBRARIES}
+  OpenMP::OpenMP_CXX
+)
+ament_target_dependencies(extract_ggm_sample ignition-math6)
+
 # Install plugin library
-install(TARGETS leo_gravity_world_plugin test_ggm
+install(TARGETS leo_gravity_world_plugin test_ggm extract_ggm_sample
   DESTINATION lib/${PROJECT_NAME}
 )
 
