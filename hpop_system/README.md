@@ -540,6 +540,36 @@ ros2 service call /rendezvous/start std_srvs/srv/Trigger
 
 ---
 
+### Individual Figures for Presentation (PPT)
+
+논문 발표 및 프레젠테이션 용도로 개별 분리된 그림 파일들입니다.
+
+| 파일명 | 설명 | PPT 슬라이드 제목 |
+|--------|------|-------------------|
+| `fig1a_gravity_vs_altitude.png` | 고도별 중력 가속도 (GGM05C vs Point Mass) | "Gravity Attenuation with Altitude" |
+| `fig1b_anomaly_vs_altitude.png` | 고도별 중력 이상 (mGal) | "Gravity Anomaly vs Altitude" |
+| `fig2a_gravity_vs_latitude.png` | 위도별 중력 가속도 (400km) | "Latitude-dependent Gravity at LEO" |
+| `fig2b_anomaly_vs_latitude.png` | 위도별 중력 이상 (J2 효과) | "J2-induced Gravity Anomaly Pattern" |
+| `fig3_global_anomaly_map.png` | 전지구 중력 이상 분포도 | "Global Gravity Anomaly at 400km" |
+| `fig4a_iss_ground_track.png` | ISS 궤도 지상궤적 | "ISS Orbit Ground Track with Gravity Anomaly" |
+| `fig4b_gravity_along_orbit.png` | 궤도 위치별 중력 | "Gravity Variation Along ISS Orbit" |
+| `fig4c_anomaly_along_orbit.png` | 궤도 위치별 중력 이상 | "Gravity Anomaly Profile Along Orbit" |
+| `fig4d_anomaly_vs_latitude_orbit.png` | 위도-이상 상관관계 | "Latitude-Anomaly Correlation in LEO" |
+| `fig5_j2_comparison.png` | GGM05C vs J2-only 비교 | "GGM05C vs J2-only Analytical Model" |
+
+**파일 위치:** `data/figures/individual/`
+
+**발표 핵심 메시지:**
+1. **고도 효과**: LEO에서 지표면 대비 ~11% 중력 감소
+2. **위도 효과**: 극지방이 적도보다 ~170 mGal 더 강한 중력
+3. **J2 지배**: 중력 이상의 ~95%는 J2 항 하나로 설명
+4. **궤도 변동**: 위성은 1 궤도 당 ~1400 mGal 중력 변동 경험
+5. **고정밀 필요성**: 고차항(J3-J70)은 수십 mGal 미세 보정 역할
+
+자세한 PPT 작성 가이드: `data/figures/individual/PPT_GUIDE.md`
+
+---
+
 ## References
 
 1. Vallado, D. A. "Fundamentals of Astrodynamics and Applications"
