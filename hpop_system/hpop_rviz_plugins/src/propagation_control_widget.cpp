@@ -17,6 +17,7 @@ namespace hpop_rviz_plugins
 PropagationControlWidget::PropagationControlWidget(QWidget* parent)
     : QWidget(parent)
     , is_propagating_(false)
+    , start_enabled_(false)
 {
     setupUi();
 }
@@ -29,9 +30,11 @@ void PropagationControlWidget::setupUi()
     // Control buttons
     auto* button_layout = new QHBoxLayout();
 
-    start_stop_button_ = new QPushButton("Start");
-    start_stop_button_->setMinimumWidth(80);
-    start_stop_button_->setStyleSheet("background-color: #4CAF50; color: white;");
+    start_stop_button_ = new QPushButton("Start HPOP");
+    start_stop_button_->setMinimumWidth(100);
+    start_stop_button_->setStyleSheet("font-weight: bold; background-color: #4CAF50; color: white;");
+    start_stop_button_->setEnabled(false);  // Disabled until satellite is configured
+    start_stop_button_->setToolTip("Configure a satellite in Data Source tab first");
     button_layout->addWidget(start_stop_button_);
 
     reset_button_ = new QPushButton("Reset");
@@ -161,13 +164,34 @@ void PropagationControlWidget::updateButtonState()
 {
     if (is_propagating_)
     {
-        start_stop_button_->setText("Stop");
-        start_stop_button_->setStyleSheet("background-color: #f44336; color: white;");
+        start_stop_button_->setText("Stop HPOP");
+        start_stop_button_->setStyleSheet("font-weight: bold; background-color: #f44336; color: white;");
     }
     else
     {
-        start_stop_button_->setText("Start");
-        start_stop_button_->setStyleSheet("background-color: #4CAF50; color: white;");
+        start_stop_button_->setText("Start HPOP");
+        start_stop_button_->setStyleSheet("font-weight: bold; background-color: #4CAF50; color: white;");
+    }
+}
+
+void PropagationControlWidget::setStartEnabled(bool enabled)
+{
+    start_enabled_ = enabled;
+    start_stop_button_->setEnabled(enabled);
+
+    if (enabled)
+    {
+        start_stop_button_->setToolTip("Start orbit propagation");
+    }
+    else
+    {
+        start_stop_button_->setToolTip("Configure a satellite in Data Source tab first");
+        if (is_propagating_)
+        {
+            is_propagating_ = false;
+            updateButtonState();
+            emit stopPropagation();
+        }
     }
 }
 

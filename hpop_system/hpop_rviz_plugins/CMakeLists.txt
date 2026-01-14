@@ -27,6 +27,8 @@ find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(hpop_msgs REQUIRED)
+find_package(trajectory_msgs REQUIRED)
+find_package(std_srvs REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
 
 # Qt5 include directories
@@ -47,6 +49,8 @@ add_library(hpop_panel SHARED
   src/hpop_panel.cpp
   src/satellite_table_widget.cpp
   src/propagation_control_widget.cpp
+  src/data_source_widget.cpp
+  src/delta_v_widget.cpp
   include/hpop_rviz_plugins/hpop_panel.hpp
 )
 
@@ -70,6 +74,8 @@ ament_target_dependencies(hpop_panel
   visualization_msgs
   tf2_ros
   hpop_msgs
+  trajectory_msgs
+  std_srvs
 )
 
 # Orbit Display plugin library

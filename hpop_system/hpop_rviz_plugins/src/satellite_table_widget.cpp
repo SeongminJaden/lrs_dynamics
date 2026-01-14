@@ -24,6 +24,11 @@ void SatelliteTableWidget::setupUi()
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
+    // Info label
+    auto* info_label = new QLabel("Add satellites using the Data Source tab");
+    info_label->setStyleSheet("color: gray; font-style: italic;");
+    layout->addWidget(info_label);
+
     // Table
     table_ = new QTableWidget(0, 5);
     table_->setHorizontalHeaderLabels({"Name", "NORAD ID", "Alt (km)", "Vel (km/s)", "Period (min)"});
@@ -34,43 +39,26 @@ void SatelliteTableWidget::setupUi()
     table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     layout->addWidget(table_);
 
-    // Input row
-    auto* input_layout = new QHBoxLayout();
+    // Button row
+    auto* button_layout = new QHBoxLayout();
 
-    auto* norad_label = new QLabel("NORAD ID:");
-    input_layout->addWidget(norad_label);
-
-    norad_input_ = new QLineEdit();
-    norad_input_->setPlaceholderText("e.g., 25544 (ISS)");
-    norad_input_->setMaximumWidth(150);
-    input_layout->addWidget(norad_input_);
-
-    fetch_tle_button_ = new QPushButton("Fetch TLE");
-    fetch_tle_button_->setMaximumWidth(80);
-    input_layout->addWidget(fetch_tle_button_);
-
-    add_button_ = new QPushButton("Add");
-    add_button_->setMaximumWidth(60);
-    input_layout->addWidget(add_button_);
-
-    remove_button_ = new QPushButton("Remove");
-    remove_button_->setMaximumWidth(70);
+    remove_button_ = new QPushButton("Remove Selected");
     remove_button_->setEnabled(false);
-    input_layout->addWidget(remove_button_);
+    button_layout->addWidget(remove_button_);
 
-    input_layout->addStretch();
-    layout->addLayout(input_layout);
+    clear_all_button_ = new QPushButton("Clear All");
+    clear_all_button_->setEnabled(false);
+    button_layout->addWidget(clear_all_button_);
+
+    button_layout->addStretch();
+    layout->addLayout(button_layout);
 
     // Connect signals
-    connect(add_button_, &QPushButton::clicked, this, &SatelliteTableWidget::onAddButtonClicked);
     connect(remove_button_, &QPushButton::clicked, this, &SatelliteTableWidget::onRemoveButtonClicked);
-    connect(fetch_tle_button_, &QPushButton::clicked, this, &SatelliteTableWidget::onAddButtonClicked);
+    connect(clear_all_button_, &QPushButton::clicked, this, &SatelliteTableWidget::onClearAllClicked);
     connect(table_, &QTableWidget::itemSelectionChanged, this, &SatelliteTableWidget::onTableSelectionChanged);
 
-    // Add some example satellites
-    addSatellite("ISS (ZARYA)", 25544, 420.0, 51.64);
-    addSatellite("STARLINK-1234", 48274, 550.0, 53.0);
-    addSatellite("SENTINEL-6A", 46984, 1336.0, 66.0);
+    // No automatic satellite addition - user must add via Data Source tab
 }
 
 void SatelliteTableWidget::addSatellite(const std::string& name, uint32_t norad_id,
@@ -84,6 +72,8 @@ void SatelliteTableWidget::addSatellite(const std::string& name, uint32_t norad_
     table_->setItem(row, 2, new QTableWidgetItem(QString::number(altitude_km, 'f', 1)));
     table_->setItem(row, 3, new QTableWidgetItem("--"));
     table_->setItem(row, 4, new QTableWidgetItem(QString::number(inclination_deg, 'f', 1)));
+
+    clear_all_button_->setEnabled(true);
 }
 
 void SatelliteTableWidget::updateSatellite(const std::string& name, double altitude_km,
@@ -99,6 +89,9 @@ void SatelliteTableWidget::updateSatellite(const std::string& name, double altit
             return;
         }
     }
+
+    // If satellite not found, add it
+    addSatellite(name, 0, altitude_km, 0.0);
 }
 
 void SatelliteTableWidget::removeSatellite(const std::string& name)
@@ -108,35 +101,26 @@ void SatelliteTableWidget::removeSatellite(const std::string& name)
         if (table_->item(row, 0)->text().toStdString() == name)
         {
             table_->removeRow(row);
-            return;
+            break;
         }
+    }
+
+    if (table_->rowCount() == 0)
+    {
+        clear_all_button_->setEnabled(false);
     }
 }
 
 void SatelliteTableWidget::clearAll()
 {
     table_->setRowCount(0);
+    clear_all_button_->setEnabled(false);
+    remove_button_->setEnabled(false);
 }
 
-void SatelliteTableWidget::onAddButtonClicked()
+int SatelliteTableWidget::getSatelliteCount() const
 {
-    QString text = norad_input_->text().trimmed();
-    if (text.isEmpty())
-    {
-        QMessageBox::warning(this, "Input Error", "Please enter a NORAD ID.");
-        return;
-    }
-
-    bool ok;
-    uint32_t norad_id = text.toUInt(&ok);
-    if (!ok)
-    {
-        QMessageBox::warning(this, "Input Error", "Invalid NORAD ID format.");
-        return;
-    }
-
-    emit addSatelliteRequested(norad_id);
-    norad_input_->clear();
+    return table_->rowCount();
 }
 
 void SatelliteTableWidget::onRemoveButtonClicked()
@@ -146,6 +130,18 @@ void SatelliteTableWidget::onRemoveButtonClicked()
     {
         QString name = table_->item(selected[0]->row(), 0)->text();
         emit removeSatelliteRequested(name);
+    }
+}
+
+void SatelliteTableWidget::onClearAllClicked()
+{
+    int ret = QMessageBox::question(this, "Clear All",
+        "Are you sure you want to remove all satellites?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (ret == QMessageBox::Yes)
+    {
+        clearAll();
     }
 }
 

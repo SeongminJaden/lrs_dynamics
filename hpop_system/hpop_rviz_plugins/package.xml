@@ -19,6 +19,8 @@
   <depend>visualization_msgs</depend>
   <depend>tf2_ros</depend>
   <depend>hpop_msgs</depend>
+  <depend>trajectory_msgs</depend>
+  <depend>std_srvs</depend>
 
   <build_depend>qtbase5-dev</build_depend>
 
