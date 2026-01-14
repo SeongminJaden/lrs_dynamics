@@ -24,6 +24,7 @@ constexpr double EARTH_ECCENTRICITY_SQ = 2.0 * EARTH_FLATTENING - EARTH_FLATTENI
 constexpr double EARTH_MU = 3.986004418e14;             // [m^3/s^2] Gravitational parameter
 constexpr double EARTH_J2 = 1.082626683e-3;             // [-] J2 coefficient
 constexpr double EARTH_OMEGA = 7.2921150e-5;            // [rad/s] Angular velocity
+constexpr double OMEGA_EARTH = EARTH_OMEGA;              // Alias for EARTH_OMEGA
 
 // Sun parameters
 constexpr double SUN_MU = 1.32712440018e20;             // [m^3/s^2] Gravitational parameter

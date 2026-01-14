@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>hpop_tle</name>
+  <version>1.0.0</version>
+  <description>TLE (Two-Line Element) parsing and Celestrak API integration for HPOP system</description>
+  <maintainer email="roboticsmaster@naver.com">Seongmin Jaden Lee</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>hpop_msgs</depend>
+  <depend>hpop_core</depend>
+  <depend>CURL</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
